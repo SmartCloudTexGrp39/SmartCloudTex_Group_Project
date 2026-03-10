@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Box, 
-  Button, 
-  TextField, 
-  Typography, 
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
   Paper,
   InputAdornment,
   IconButton,
@@ -16,7 +16,7 @@ import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
-  
+
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
@@ -27,15 +27,15 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 p-4 relative overflow-hidden">
       {/* Decorative background blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
       <div className="absolute top-0 right-0 w-96 h-96 bg-rose-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
       <div className="absolute -bottom-8 left-20 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-      
+
       <Grow in={true} timeout={800}>
-        <Paper 
-          elevation={0} 
+        <Paper
+          elevation={0}
           className="w-full max-w-md p-8 rounded-3xl border border-white/40 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl z-10"
         >
           <Box className="flex justify-between items-center mb-8">
@@ -60,13 +60,14 @@ export default function RegisterPage() {
               label="Username"
               type="text"
               required
+              InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <User size={20} className="text-slate-400" />
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white dark:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-slate-800"
               }}
             />
 
@@ -76,13 +77,14 @@ export default function RegisterPage() {
               label="Email Address"
               type="email"
               required
+              InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <Mail size={20} className="text-slate-400" />
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white dark:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-slate-800"
               }}
             />
 
@@ -92,6 +94,7 @@ export default function RegisterPage() {
               label="Create Password"
               type={showPassword ? 'text' : 'password'}
               required
+              InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -109,7 +112,7 @@ export default function RegisterPage() {
                     </IconButton>
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white dark:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-slate-800"
               }}
             />
 
@@ -119,6 +122,7 @@ export default function RegisterPage() {
               label="Re-enter Password"
               type={showConfirmPassword ? 'text' : 'password'}
               required
+              InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -136,7 +140,7 @@ export default function RegisterPage() {
                     </IconButton>
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white dark:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-slate-800"
               }}
             />
 
@@ -154,7 +158,7 @@ export default function RegisterPage() {
 
           <Typography variant="body2" className="text-center text-slate-500 dark:text-slate-400 mt-8">
             Already have an account?{' '}
-            <span 
+            <span
               className="text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:underline"
               onClick={() => router.push('/')}
             >
