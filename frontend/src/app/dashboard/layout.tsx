@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import Box from '@mui/material/Box';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -14,11 +16,11 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
-import { 
-  FolderOpen, 
-  CloudUpload, 
-  Search, 
-  BarChart, 
+import {
+  FolderOpen,
+  CloudUpload,
+  Search,
+  BarChart,
   Settings,
   LogOut,
   Moon,
@@ -41,6 +43,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setIsClosing(false);
   };
 
+  const pathname = usePathname();
+
   const handleDrawerToggle = () => {
     if (!isClosing) {
       setMobileOpen(!mobileOpen);
@@ -48,44 +52,57 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const menuItems = [
-    { title: 'My Files', icon: <FolderOpen size={20} /> },
-    { title: 'Upload', icon: <CloudUpload size={20} /> },
-    { title: 'Semantic Search', icon: <Search size={20} /> },
-    { title: 'Analytics', icon: <BarChart size={20} /> },
-    { title: 'Settings', icon: <Settings size={20} /> },
+    { title: 'My Files', icon: <FolderOpen size={20} />, path: '/dashboard' },
+    { title: 'Upload', icon: <CloudUpload size={20} />, path: '/dashboard/upload' },
+    { title: 'Semantic Search', icon: <Search size={20} />, path: '/dashboard/search' },
+    { title: 'Analytics', icon: <BarChart size={20} />, path: '/dashboard/analytics' },
+    { title: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings' },
   ];
 
   const drawer = (
-    <div className="h-full flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
-      <Toolbar className="flex items-center justify-center py-6">
-        <Typography variant="h6" noWrap component="div" className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-rose-500">
+    <div className="h-full flex flex-col bg-[#0f172a] text-white">
+      <Toolbar className="flex items-center justify-center py-8">
+        <Typography variant="h5" noWrap component="div" className="font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-rose-400">
           SmartCloudTex
         </Typography>
       </Toolbar>
-      <Divider className="dark:border-slate-800" />
-      <List className="px-3 py-4 flex-1">
-        {menuItems.map((item, index) => (
-          <ListItem key={item.title} disablePadding className="mb-2">
-            <ListItemButton className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-              <ListItemIcon className="text-slate-500 dark:text-slate-400 min-w-[40px]">
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText 
-                primary={item.title} 
-                primaryTypographyProps={{ className: 'font-medium text-sm' }} 
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+
+      <List className="px-4 py-2 flex-1">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.path;
+          return (
+            <ListItem key={item.title} disablePadding className="mb-2">
+              <Link href={item.path} passHref style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
+                <ListItemButton
+                  className={`rounded-xl transition-all duration-200 py-3 ${isActive
+                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30'
+                    : 'text-white/70 hover:text-white hover:bg-blue-400/20'
+                    }`}
+                >
+                  <ListItemIcon sx={{ minWidth: '40px', color: 'white !important' }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.title}
+                    primaryTypographyProps={{
+                      className: `font-semibold text-sm ${isActive ? 'text-white' : ''}`
+                    }}
+                  />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+          );
+        })}
       </List>
-      <Divider className="dark:border-slate-800" />
-      <Box className="p-4">
+
+      <Box className="p-4 mt-auto">
+        <Divider className="bg-white/10 mb-4" />
         <ListItem disablePadding>
-          <ListItemButton className="rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all">
-            <ListItemIcon className="text-rose-500 min-w-[40px]">
+          <ListItemButton className="rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all py-3">
+            <ListItemIcon className="text-rose-400 min-w-[40px]">
               <LogOut size={20} />
             </ListItemIcon>
-            <ListItemText primary="Logout" primaryTypographyProps={{ className: 'font-medium text-sm' }} />
+            <ListItemText primary="Logout" primaryTypographyProps={{ className: 'font-semibold text-sm' }} />
           </ListItemButton>
         </ListItem>
       </Box>
