@@ -30,9 +30,12 @@ import {
 
 const drawerWidth = 280;
 
+type UserRole = 'Admin' | 'Supervisor' | 'Staff';
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
+  const [role, setRole] = React.useState<UserRole>('Admin'); // Mock role for UI demo
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -52,40 +55,49 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const menuItems = [
-    { title: 'My Files', icon: <FolderOpen size={20} />, path: '/dashboard' },
-    { title: 'Upload', icon: <CloudUpload size={20} />, path: '/dashboard/upload' },
-    { title: 'Semantic Search', icon: <Search size={20} />, path: '/dashboard/search' },
-    { title: 'Analytics', icon: <BarChart size={20} />, path: '/dashboard/analytics' },
-    { title: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings' },
+    { title: 'My Files', icon: <FolderOpen size={20} />, path: '/dashboard', roles: ['Admin', 'Supervisor', 'Staff'] },
+    { title: 'Upload', icon: <CloudUpload size={20} />, path: '/dashboard/upload', roles: ['Admin', 'Supervisor', 'Staff'] },
+    { title: 'Semantic Search', icon: <Search size={20} />, path: '/dashboard/search', roles: ['Admin', 'Supervisor', 'Staff'] },
+    { title: 'Analytics', icon: <BarChart size={20} />, path: '/dashboard/analytics', roles: ['Admin', 'Supervisor'] },
+    { title: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings', roles: ['Admin'] },
   ];
 
+  const filteredMenuItems = menuItems.filter(item => item.roles.includes(role));
+
   const drawer = (
-    <div className="h-full flex flex-col bg-[#0f172a] text-white">
-      <Toolbar className="flex items-center justify-center py-8">
-        <Typography variant="h5" noWrap component="div" className="font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-rose-400">
-          SmartCloudTex
-        </Typography>
+    <div className="h-full flex flex-col bg-slate-950/90 backdrop-blur-xl border-r border-white/5 text-white">
+      <Toolbar className="flex items-center justify-start px-8 py-10">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
+            <img src="/logo.png" alt="SmartCloudTex Logo" className="w-10 h-10 object-contain" />
+          </div>
+          <Typography variant="h5" noWrap className="font-bold tracking-tight text-white">
+            SmartCloud
+          </Typography>
+        </div>
       </Toolbar>
 
-      <List className="px-4 py-2 flex-1">
-        {menuItems.map((item) => {
+      <List className="px-4 py-2 flex-1 space-y-1">
+        {filteredMenuItems.map((item) => {
           const isActive = pathname === item.path;
           return (
-            <ListItem key={item.title} disablePadding className="mb-2">
-              <Link href={item.path} passHref style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
+            <ListItem key={item.title} disablePadding>
+              <Link href={item.path} passHref className="w-full">
                 <ListItemButton
-                  className={`rounded-xl transition-all duration-200 py-3 ${isActive
-                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30'
-                    : 'text-white/70 hover:text-white hover:bg-blue-400/20'
+                  className={`rounded-xl transition-all duration-300 py-3 group ${isActive
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
                 >
-                  <ListItemIcon sx={{ minWidth: '40px', color: 'white !important' }}>
-                    {item.icon}
+                  <ListItemIcon sx={{ minWidth: '40px', color: 'inherit' }}>
+                    <div className={isActive ? 'text-white' : 'group-hover:text-white transition-colors'}>
+                      {item.icon}
+                    </div>
                   </ListItemIcon>
                   <ListItemText
                     primary={item.title}
                     primaryTypographyProps={{
-                      className: `font-semibold text-sm ${isActive ? 'text-white' : ''}`
+                      className: `font-semibold text-sm`
                     }}
                   />
                 </ListItemButton>
@@ -95,35 +107,55 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         })}
       </List>
 
-      <Box className="p-4 mt-auto">
-        <Divider className="bg-white/10 mb-4" />
-        <ListItem disablePadding>
-          <ListItemButton className="rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all py-3">
-            <ListItemIcon className="text-rose-400 min-w-[40px]">
-              <LogOut size={20} />
-            </ListItemIcon>
-            <ListItemText primary="Logout" primaryTypographyProps={{ className: 'font-semibold text-sm' }} />
-          </ListItemButton>
-        </ListItem>
+      <Box className="p-6 mt-auto">
+        <div className="glass-card bg-white/5 p-4 mb-4 border border-white/10">
+          <div className="flex items-center gap-3 mb-3">
+            <Avatar className="w-10 h-10 border-2 border-blue-500/50">SA</Avatar>
+            <div className="overflow-hidden">
+              <Typography variant="subtitle2" className="font-bold truncate">Samuel Abishai</Typography>
+              <Typography variant="caption" className="text-blue-400 block">{role}</Typography>
+            </div>
+          </div>
+          {/* Role Switcher for Demo */}
+          <div className="flex gap-1 bg-black/20 p-1 rounded-lg">
+            {(['Admin', 'Supervisor', 'Staff'] as UserRole[]).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className={`flex-1 text-[10px] py-1 rounded-md transition-all ${role === r ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                {r[0]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <Divider className="bg-white/5 mb-4" />
+        <ListItemButton className="rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all py-3">
+          <ListItemIcon className="text-rose-400 min-w-[40px]">
+            <LogOut size={20} />
+          </ListItemIcon>
+          <ListItemText primary="Logout" primaryTypographyProps={{ className: 'font-semibold text-sm' }} />
+        </ListItemButton>
       </Box>
     </div>
   );
 
   return (
-    <Box sx={{ display: 'flex' }} className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <Box sx={{ display: 'flex' }} className="min-h-screen bg-slate-50 dark:bg-[#020617]">
       <AppBar
         position="fixed"
         elevation={0}
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          bgcolor: 'background.paper',
+          bgcolor: 'transparent',
+          backdropFilter: 'blur(12px)',
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
-        className="dark:bg-slate-900 dark:border-slate-800"
+        className="dark:border-slate-800/50"
       >
-        <Toolbar>
+        <Toolbar className="justify-between px-6">
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -134,19 +166,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <MenuIcon />
           </IconButton>
-          <Box className="flex-1" />
-          <Box className="flex items-center gap-4">
-            <IconButton className="text-slate-500 dark:text-slate-400">
+
+          <div className="flex-1 max-w-md hidden md:block">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search across all clouds..." 
+                className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <Box className="flex items-center gap-2">
+            <IconButton className="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
               <Sun size={20} />
             </IconButton>
-            <Avatar className="w-8 h-8 bg-blue-600 text-sm font-semibold">SA</Avatar>
+            <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-800 mx-2" />
+            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="text-right hidden sm:block">
+                <Typography variant="body2" className="font-bold text-slate-700 dark:text-slate-200 leading-none mb-1">Samuel Abishai</Typography>
+                <Typography variant="caption" className="text-slate-400">{role}</Typography>
+              </div>
+              <Avatar className="w-9 h-9 bg-blue-600 text-sm font-semibold shadow-lg shadow-blue-500/20">SA</Avatar>
+            </div>
           </Box>
         </Toolbar>
       </AppBar>
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
       >
         <Drawer
           variant="temporary"
@@ -156,7 +205,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, border: 'none' },
           }}
         >
           {drawer}
@@ -174,7 +223,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+        sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+        className="animate-in-fade"
       >
         <Toolbar />
         {children}

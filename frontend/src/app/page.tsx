@@ -37,7 +37,10 @@ export default function LoginPage() {
           elevation={0}
           className="w-full max-w-md p-8 rounded-3xl border border-white/40 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl z-10"
         >
-          <Box className="flex justify-between items-center mb-8">
+          <Box className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md overflow-hidden p-1 border border-slate-100 dark:border-slate-800">
+              <img src="/logo.png" alt="SmartCloudTex Logo" className="w-full h-full object-contain" />
+            </div>
             <Typography variant="h5" className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-rose-500 tracking-tight">
               SmartCloudTex
             </Typography>
