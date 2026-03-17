@@ -12,12 +12,12 @@ import {
 } from '@mui/material';
 import {
   Cloud,
-  HardDrive,
-  Server,
   FileText,
   MoreVertical,
   Download,
-  Share2
+  Share2,
+  HardDrive,
+  Server
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -118,7 +118,7 @@ export default function DashboardPage() {
                 </Typography>
 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <Typography variant="h4" className="font-black text-slate-900 dark:text-white">
+                  <Typography variant="h4" className="font-black !text-black dark:text-white">
                     {stat.used}
                   </Typography>
                   <Typography variant="body2" className="text-slate-500 font-medium">

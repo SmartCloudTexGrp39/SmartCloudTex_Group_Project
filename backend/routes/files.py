@@ -44,7 +44,7 @@ async def upload_file(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/list")
-async def list_files(current_user: UserInDB = Depends(get_current_user)):
+async def list_files():
     db = get_db()
     cursor = db["files"].find()
     
