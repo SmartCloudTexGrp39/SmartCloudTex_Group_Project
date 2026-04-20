@@ -33,6 +33,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     
     if user is None:
         raise credentials_exception
+        
+    user["_id"] = str(user["_id"])
     return UserInDB(**user)
 
 def check_role(required_role: Role):
@@ -66,6 +68,7 @@ async def register(user: UserCreate):
     
     result = await db["users"].insert_one(new_user)
     created_user = await db["users"].find_one({"_id": result.inserted_id})
+    created_user["_id"] = str(created_user["_id"])
     return UserResponse(**created_user)
 
 @router.post("/login", response_model=Token)
@@ -75,6 +78,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not user_dict:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
         
+    user_dict["_id"] = str(user_dict["_id"])
     user = UserInDB(**user_dict)
     if not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect username or password")

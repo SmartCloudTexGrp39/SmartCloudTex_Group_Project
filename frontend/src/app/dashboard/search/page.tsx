@@ -61,7 +61,7 @@ export default function SearchPage() {
           Unified Search
         </Typography>
         <Typography variant="body1" className="text-slate-500 max-w-lg mx-auto">
-          Search across Google Drive, Dropbox, and OneDrive with natural language and AI tagging.
+          Search across Google Drive, Dropbox and OneDrive with natural language and AI tagging.
         </Typography>
       </div>
 

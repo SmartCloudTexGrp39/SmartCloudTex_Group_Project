@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
@@ -35,7 +35,29 @@ type UserRole = 'Admin' | 'Supervisor' | 'Staff';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
-  const [role, setRole] = React.useState<UserRole>('Admin'); // Mock role for UI demo
+  const [role, setRole] = React.useState<UserRole>('Staff');
+  const [username, setUsername] = React.useState('Loading...');
+
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.role) setRole(user.role as UserRole);
+        if (user.username) setUsername(user.username);
+      } catch (e) {}
+    } else {
+      router.push('/');
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/');
+  };
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -110,27 +132,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Box className="p-6 mt-auto">
         <div className="glass-card bg-white/5 p-4 mb-4 border border-white/10">
           <div className="flex items-center gap-3 mb-3">
-            <Avatar className="w-10 h-10 border-2 border-blue-500/50">SA</Avatar>
+            <Avatar className="w-10 h-10 border-2 border-blue-500/50 uppercase">{username[0]}</Avatar>
             <div className="overflow-hidden">
-              <Typography variant="subtitle2" className="font-bold truncate">Samuel Abishai</Typography>
+              <Typography variant="subtitle2" className="font-bold truncate">{username}</Typography>
               <Typography variant="caption" className="text-blue-400 block">{role}</Typography>
             </div>
           </div>
-          {/* Role Switcher for Demo */}
-          <div className="flex gap-1 bg-black/20 p-1 rounded-lg">
-            {(['Admin', 'Supervisor', 'Staff'] as UserRole[]).map((r) => (
-              <button
-                key={r}
-                onClick={() => setRole(r)}
-                className={`flex-1 text-[10px] py-1 rounded-md transition-all ${role === r ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
-              >
-                {r[0]}
-              </button>
-            ))}
-          </div>
         </div>
         <Divider className="bg-white/5 mb-4" />
-        <ListItemButton className="rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all py-3">
+        <ListItemButton onClick={handleLogout} className="rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all py-3">
           <ListItemIcon className="text-rose-400 min-w-[40px]">
             <LogOut size={20} />
           </ListItemIcon>
@@ -185,10 +195,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-800 mx-2" />
             <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
               <div className="text-right hidden sm:block">
-                <Typography variant="body2" className="font-bold text-slate-700 dark:text-slate-200 leading-none mb-1">Samuel Abishai</Typography>
+                <Typography variant="body2" className="font-bold text-slate-700 dark:text-slate-200 leading-none mb-1">{username}</Typography>
                 <Typography variant="caption" className="text-slate-400">{role}</Typography>
               </div>
-              <Avatar className="w-9 h-9 bg-blue-600 text-sm font-semibold shadow-lg shadow-blue-500/20">SA</Avatar>
+              <Avatar className="w-9 h-9 bg-blue-600 text-sm font-semibold shadow-lg shadow-blue-500/20 uppercase">{username[0]}</Avatar>
             </div>
           </Box>
         </Toolbar>

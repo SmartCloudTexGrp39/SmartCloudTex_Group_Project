@@ -10,20 +10,61 @@ import {
   Paper,
   InputAdornment,
   IconButton,
-  Grow
+  Grow,
+  Alert
 } from '@mui/material';
 import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { register } from '../api';
 
 export default function RegisterPage() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  
+  const [username, setUsername] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [role, setRole] = React.useState('Staff');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [successMsg, setSuccessMsg] = React.useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
+  const textFieldStyles = {
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: 'rgba(148, 163, 184, 0.3)' },
+      '&:hover fieldset': { borderColor: 'rgba(148, 163, 184, 0.5)' },
+      '&.Mui-focused fieldset': { borderColor: '#2563eb', borderWidth: '2px' },
+      '& input::placeholder': { color: '#94a3b8', opacity: 1 },
+      color: 'inherit'
+    },
+    '& .MuiInputLabel-root': { color: '#64748b' },
+    '& .MuiInputLabel-root.Mui-focused': { color: '#2563eb' }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate register
-    router.push('/dashboard');
+    setError('');
+    setSuccessMsg('');
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await register(username, email, role, password);
+      setSuccessMsg('Registration successful! Redirecting to login...');
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,12 +98,49 @@ export default function RegisterPage() {
           </Box>
 
           <Box component="form" onSubmit={handleRegister} display="flex" flexDirection="column" gap={3}>
+            {error && (
+              <Alert severity="error" className="rounded-xl font-medium">
+                {error}
+              </Alert>
+            )}
+            {successMsg && (
+              <Alert severity="success" className="rounded-xl font-medium">
+                {successMsg}
+              </Alert>
+            )}
+
+            <Box className="mb-2">
+              <Typography variant="caption" className="text-slate-500 font-bold ml-2 uppercase tracking-wide">
+                Select Your Role
+              </Typography>
+              <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full items-center mt-2 shadow-inner border border-slate-200 dark:border-slate-700">
+                {['Admin', 'Supervisor', 'Staff'].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRole(r)}
+                    className={`flex-1 text-center py-2.5 rounded-full font-bold transition-all text-sm ${
+                      role === r
+                        ? 'bg-blue-600 text-white shadow-md transform scale-[1.02]'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </Box>
+
             <TextField
+              sx={textFieldStyles}
               fullWidth
               variant="outlined"
               label="Username"
+              placeholder="Create a username"
               type="text"
               required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
@@ -75,11 +153,15 @@ export default function RegisterPage() {
             />
 
             <TextField
+              sx={textFieldStyles}
               fullWidth
               variant="outlined"
               label="Email Address"
+              placeholder="Enter your email address"
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
@@ -92,11 +174,15 @@ export default function RegisterPage() {
             />
 
             <TextField
+              sx={textFieldStyles}
               fullWidth
               variant="outlined"
               label="Create Password"
+              placeholder="Create a strong password"
               type={showPassword ? 'text' : 'password'}
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
@@ -120,11 +206,15 @@ export default function RegisterPage() {
             />
 
             <TextField
+              sx={textFieldStyles}
               fullWidth
               variant="outlined"
               label="Re-enter Password"
+              placeholder="Confirm your password"
               type={showConfirmPassword ? 'text' : 'password'}
               required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: (
@@ -152,10 +242,11 @@ export default function RegisterPage() {
               fullWidth
               variant="contained"
               size="large"
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3.5 shadow-lg shadow-blue-500/30 font-semibold text-base capitalize"
+              disabled={loading}
+              className={`bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3.5 shadow-lg shadow-blue-500/30 font-semibold text-base capitalize ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
               disableElevation
             >
-              Register
+              {loading ? 'Registering...' : 'Register'}
             </Button>
           </Box>
 

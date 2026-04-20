@@ -39,29 +39,54 @@ export default function UploadPage() {
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [selectedFile, setSelectedFile] = React.useState<{ name: string, size: string } | null>(null);
   const [showDuplicateModal, setShowDuplicateModal] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // Mock analysis results
-  const [analysis, setAnalysis] = React.useState<{ tags: string[], route: string } | null>(null);
+  // Analysis result from the backend
+  const [analysis, setAnalysis] = React.useState<{ tags: string[], route: string, duplicate?: boolean } | null>(null);
 
-  const handleFileSelect = () => {
-    // Mock file selection
-    setSelectedFile({ name: 'Autumn_Collection_2026_v1.pdf', size: '2.8 MB' });
-    setActiveStep(1);
-    startAnalysis();
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const sizeStr = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+      setSelectedFile({ name: file.name, size: sizeStr });
+      setActiveStep(1);
+      setError(null);
+      await processUpload(file);
+    }
   };
 
-  const startAnalysis = () => {
+  const processUpload = async (file: File) => {
     setIsAnalyzing(true);
-    setTimeout(() => {
+    try {
+      const token = localStorage.getItem('token') || '';
+      
+      // We import it here or at the top of the file
+      const { uploadFile } = await import('../../api');
+      
+      const response = await uploadFile(file, token);
+      
       setAnalysis({
-        tags: ['Design', 'Silk', 'Invoice'],
-        route: 'Google Drive'
+        tags: response.tags || ['General'],
+        route: response.cloud_provider || 'Google Drive',
+        duplicate: response.is_duplicate || false
       });
+      
       setIsAnalyzing(false);
-      // Simulate duplicate detection for demo
-      setTimeout(() => setShowDuplicateModal(true), 500);
-    }, 2000);
+      
+      if (response.is_duplicate) {
+        setShowDuplicateModal(true);
+      } else {
+        // Automatically move to final step if not duplicate
+        setTimeout(() => setActiveStep(2), 1000);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'An error occurred during upload. Please log in first.');
+      setIsAnalyzing(false);
+    }
   };
+
+
 
   const handleResolveDuplicate = (option: string) => {
     setShowDuplicateModal(false);
@@ -95,7 +120,6 @@ export default function UploadPage() {
         <div className="min-h-[300px] flex flex-col items-center justify-center text-center">
           {activeStep === 0 && (
             <div
-              onClick={handleFileSelect}
               className="w-full border-2 border-dashed border-slate-200 dark:border-white/10 rounded-3xl p-12 hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all cursor-pointer group"
             >
               <div className="w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 mb-6 mx-auto group-hover:scale-110 transition-transform">
@@ -174,22 +198,26 @@ export default function UploadPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-4 justify-center">
-                    <Button
-                      variant="outlined"
-                      onClick={() => setActiveStep(0)}
-                      className="border-slate-200 dark:border-white/10 rounded-xl px-8 py-3 dark:text-white"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={() => setActiveStep(2)}
-                      className="bg-blue-600 hover:bg-blue-700 rounded-xl px-12 py-3 font-bold shadow-lg shadow-blue-500/20"
-                    >
-                      Confirm Routing
-                    </Button>
-                  </div>
+                  {error && (
+                    <Typography className="text-red-500 font-bold mb-4">{error}</Typography>
+                  )}
+
+                  {!analysis?.duplicate && !error && (
+                     <div className="flex gap-4 justify-center mt-4">
+                       <Typography className="text-slate-500">Processing route confirmation...</Typography>
+                     </div>
+                  )}
+                  {error && (
+                    <div className="flex gap-4 justify-center">
+                      <Button
+                        variant="contained"
+                        onClick={() => {setActiveStep(0); setError(null);}}
+                        className="bg-blue-600 rounded-xl px-12 py-3 font-bold"
+                      >
+                        Try Again
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
