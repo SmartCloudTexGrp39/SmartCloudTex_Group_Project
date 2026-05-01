@@ -18,7 +18,7 @@ import {
   IconButton
 } from '@mui/material';
 import {
-  CloudUpload,
+  Cloud,
   FileText,
   Brain,
   Zap,
@@ -27,9 +27,9 @@ import {
   X,
   RefreshCw,
   Copy,
-  FolderTree,
-  Cloud
+  CloudUpload
 } from 'lucide-react';
+import { uploadFile } from '../../api';
 
 const steps = ['Select File', 'Smart Analysis', 'Final Routing'];
 
@@ -40,29 +40,51 @@ export default function UploadPage() {
   const [selectedFile, setSelectedFile] = React.useState<{ name: string, size: string } | null>(null);
   const [showDuplicateModal, setShowDuplicateModal] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [dragActive, setDragActive] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Analysis result from the backend
   const [analysis, setAnalysis] = React.useState<{ tags: string[], route: string, duplicate?: boolean } | null>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const sizeStr = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-      setSelectedFile({ name: file.name, size: sizeStr });
-      setActiveStep(1);
-      setError(null);
-      await processUpload(file);
+      await processSelectedFile(e.target.files[0]);
     }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await processSelectedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const processSelectedFile = async (file: File) => {
+    const sizeStr = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    setSelectedFile({ name: file.name, size: sizeStr });
+    setActiveStep(1);
+    setError(null);
+    await processUpload(file);
   };
 
   const processUpload = async (file: File) => {
     setIsAnalyzing(true);
     try {
       const token = localStorage.getItem('token') || '';
-      
-      // We import it here or at the top of the file
-      const { uploadFile } = await import('../../api');
-      
       const response = await uploadFile(file, token);
       
       setAnalysis({
@@ -120,19 +142,28 @@ export default function UploadPage() {
         <div className="min-h-[300px] flex flex-col items-center justify-center text-center">
           {activeStep === 0 && (
             <div
-              className="w-full border-2 border-dashed border-slate-200 dark:border-white/10 rounded-3xl p-12 hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all cursor-pointer group"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`w-full border-2 border-dashed rounded-3xl p-12 transition-all cursor-pointer group ${
+                dragActive 
+                  ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/30' 
+                  : 'border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/10'
+              }`}
             >
               <div className="w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 mb-6 mx-auto group-hover:scale-110 transition-transform">
                 <CloudUpload size={40} />
               </div>
               <Typography variant="h6" className="font-bold text-slate-800 dark:text-white mb-2">
-                Drop your files here
+                Drop your files here or click to browse
               </Typography>
               <Typography variant="body2" className="text-slate-500 mb-6">
                 Support PDF, DOCX, PNG, and JPG up to 50MB
               </Typography>
-              <Button variant="contained" className="bg-blue-600 hover:bg-blue-700 rounded-xl px-10 py-3 font-bold normal-case shadow-lg shadow-blue-500/20">
+              <Button component="label" variant="contained" className="bg-blue-600 hover:bg-blue-700 rounded-xl px-10 py-3 font-bold normal-case shadow-lg shadow-blue-500/20">
                 Browse Files
+                <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileSelect} />
               </Button>
             </div>
           )}

@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const user = JSON.parse(userStr);
         if (user.role) setRole(user.role as UserRole);
         if (user.username) setUsername(user.username);
-      } catch (e) {}
+      } catch (e) { }
     } else {
       router.push('/');
     }
@@ -93,8 +93,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
             <img src="/logo.png" alt="SmartCloudTex Logo" className="w-10 h-10 object-contain" />
           </div>
-          <Typography variant="h5" noWrap className="font-bold tracking-tight text-white">
-            SmartCloud
+          <Typography variant="h5" className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-rose-500 tracking-tight">
+            SmartCloudTex
           </Typography>
         </div>
       </Toolbar>
@@ -151,7 +151,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <Box sx={{ display: 'flex' }} className="min-h-screen bg-slate-50 dark:bg-[#020617]">
+    <Box sx={{ display: 'flex' }} className="min-h-screen bg-slate-50 dark:bg-gray-950">
       <AppBar
         position="fixed"
         elevation={0}
@@ -180,9 +180,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1 max-w-md hidden md:block">
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search across all clouds..." 
+              <input
+                type="text"
+                placeholder="Search across all clouds..."
                 className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
               />
             </div>

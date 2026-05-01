@@ -1,0 +1,30 @@
+# Sensitive Google API files
+backend/token.json
+backend/credentials.json
+
+# Environment variables
+backend/.env
+.env
+.env.local
+
+# Python environment
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# Node.js dependencies
+node_modules/
+frontend/node_modules/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db

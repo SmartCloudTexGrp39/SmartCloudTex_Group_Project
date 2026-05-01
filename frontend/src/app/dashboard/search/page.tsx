@@ -22,34 +22,64 @@ import {
   Tag,
   ArrowRight
 } from 'lucide-react';
+import { fetchFiles } from '../../api';
 
 export default function SearchPage() {
   const [query, setQuery] = React.useState('');
   const [activeFilters, setActiveFilters] = React.useState(['Google Drive', 'Design']);
 
-  const mockResults = [
-    { 
-      name: 'Autumn_Collection_Report_2025.pdf', 
-      cloud: 'Google Drive', 
-      tags: ['Design', 'Report'], 
-      date: 'Oct 12, 2025',
-      size: '4.2 MB'
-    },
-    { 
-      name: 'Silk_Invoice_Vendor_X.docx', 
-      cloud: 'Dropbox', 
-      tags: ['Invoice', 'Vendor'], 
-      date: 'Nov 05, 2025',
-      size: '1.2 MB'
-    },
-    { 
-      name: 'Pattern_Library_V2.zip', 
-      cloud: 'OneDrive', 
-      tags: ['Design', 'Library'], 
-      date: 'Dec 01, 2025',
-      size: '128 MB'
-    }
-  ];
+  const [allFiles, setAllFiles] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const loadFiles = async () => {
+      try {
+        const data = await fetchFiles();
+        // Sort newest first
+        const sorted = data.sort((a: any, b: any) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
+        setAllFiles(sorted);
+      } catch (err) {
+        console.error("Failed to load files", err);
+      }
+    };
+    loadFiles();
+  }, []);
+
+  const formatSize = (bytes: number) => {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
+  const toggleFilter = (filter: string) => {
+    setActiveFilters(prev => 
+      prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+    );
+  };
+
+  const filteredResults = allFiles.filter(file => {
+    // Search query matching
+    const matchesQuery = query === '' || 
+      file.filename.toLowerCase().includes(query.toLowerCase()) || 
+      (file.tags && file.tags.some((t: string) => t.toLowerCase().includes(query.toLowerCase())));
+      
+    // Active filters matching (if no filters are active, show all)
+    // Filters contain both Cloud Providers and Tags
+    const matchesFilters = activeFilters.length === 0 || 
+      activeFilters.some(filter => 
+        file.cloud_provider === filter || 
+        (file.tags && file.tags.map((t: string) => t.toLowerCase()).includes(filter.toLowerCase()))
+      );
+      
+    return matchesQuery && matchesFilters;
+  });
 
   const clouds = ['Google Drive', 'Dropbox', 'OneDrive'];
   const categories = ['Invoice', 'Design', 'Order', 'Compliance', 'Report'];
@@ -60,9 +90,11 @@ export default function SearchPage() {
         <Typography variant="h3" className="font-black text-slate-900 dark:text-white tracking-tight">
           Unified Search
         </Typography>
-        <Typography variant="body1" className="text-slate-500 max-w-lg mx-auto">
-          Search across Google Drive, Dropbox and OneDrive with natural language and AI tagging.
-        </Typography>
+        <div className="flex items-center justify-center gap-2 text-blue-600">
+          <Typography variant="body1" className="text-slate-500 max-w-lg mx-auto">
+            Search across Google Drive, Dropbox and OneDrive with natural language and AI tagging.
+          </Typography>
+        </div>
       </div>
 
       <div className="relative max-w-2xl mx-auto">
@@ -100,8 +132,8 @@ export default function SearchPage() {
               <Chip 
                 key={cloud} 
                 label={cloud} 
-                onClick={() => {}}
-                className={`rounded-xl font-bold h-9 transition-all ${activeFilters.includes(cloud) ? 'bg-blue-600 !text-white shadow-lg shadow-blue-500/20' : 'bg-slate-100 dark:bg-white/5 dark:text-slate-400'}`}
+                onClick={() => toggleFilter(cloud)}
+                className={`rounded-xl font-bold h-9 transition-all border border-transparent ${activeFilters.includes(cloud) ? 'bg-blue-600 !text-white shadow-lg shadow-blue-500/20' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-700'}`}
               />
             ))}
             <div className="w-[1px] h-6 bg-slate-200 dark:bg-white/10 mx-2 self-center" />
@@ -109,8 +141,8 @@ export default function SearchPage() {
               <Chip 
                 key={cat} 
                 label={cat} 
-                onClick={() => {}}
-                className={`rounded-xl font-bold h-9 transition-all ${activeFilters.includes(cat) ? 'bg-indigo-600 !text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-100 dark:bg-white/5 dark:text-slate-400'}`}
+                onClick={() => toggleFilter(cat)}
+                className={`rounded-xl font-bold h-9 transition-all border border-transparent ${activeFilters.includes(cat) ? 'bg-indigo-600 !text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 cursor-pointer hover:bg-indigo-100 dark:hover:bg-slate-700'}`}
               />
             ))}
           </div>
@@ -118,10 +150,15 @@ export default function SearchPage() {
 
         {/* Results */}
         <div className="space-y-4">
-          <Typography variant="overline" className="text-slate-400 font-black">3 results found across all clouds</Typography>
+          <Typography variant="overline" className="text-slate-400 font-black">{filteredResults.length} results found</Typography>
           
           <Grid container spacing={3}>
-            {mockResults.map((result, index) => (
+            {filteredResults.length === 0 ? (
+              <div className="w-full text-center py-12">
+                <Typography className="text-slate-500">No files found matching your search criteria.</Typography>
+              </div>
+            ) : (
+            filteredResults.map((result, index) => (
               <Grid size={{ xs: 12 }} key={index}>
                 <Paper elevation={0} className="glass-card p-5 border-slate-200/50 dark:border-white/5 hover:border-blue-500/30 transition-all flex items-center justify-between group">
                   <div className="flex items-center gap-5">
@@ -130,15 +167,19 @@ export default function SearchPage() {
                     </div>
                     <div className="space-y-1">
                       <Typography variant="h6" className="font-bold !text-black dark:text-white leading-tight">
-                        {result.name}
+                        {result.filename}
                       </Typography>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5 text-slate-400">
                           <Calendar size={14} />
-                          <span className="text-[11px] font-bold">{result.date}</span>
+                          <span className="text-[11px] font-bold">{formatDate(result.upload_date)}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-slate-400">
+                          <Cloud size={14} />
+                          <span className="text-[11px] font-bold">{formatSize(result.size_bytes)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {result.tags.map(tag => (
+                          {(result.tags || []).slice(0, 4).map((tag: string) => (
                             <Chip 
                               key={tag} 
                               label={tag} 
@@ -155,10 +196,10 @@ export default function SearchPage() {
                     <div className="flex items-center gap-3 bg-slate-50 dark:bg-white/5 px-4 py-2 rounded-2xl border border-slate-100 dark:border-white/5">
                       <div className="flex flex-col items-end">
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Source Cloud</span>
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{result.cloud}</span>
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{result.cloud_provider}</span>
                       </div>
                       <Avatar className="w-8 h-8 bg-blue-600 text-[10px] font-bold shadow-lg shadow-blue-500/10">
-                        {result.cloud[0]}
+                        {result.cloud_provider[0]}
                       </Avatar>
                     </div>
                     <IconButton className="bg-slate-100 dark:bg-white/5 hover:bg-blue-600 hover:text-white transition-all rounded-xl p-3">
@@ -167,7 +208,8 @@ export default function SearchPage() {
                   </div>
                 </Paper>
               </Grid>
-            ))}
+            ))
+            )}
           </Grid>
         </div>
       </div>

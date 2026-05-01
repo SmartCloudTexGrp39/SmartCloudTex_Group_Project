@@ -6,6 +6,7 @@ from services.ai_service import generate_ai_tags
 from utils.hashing import generate_file_hash
 from database import get_db
 import io
+import os
 import datetime
 
 router = APIRouter(prefix="/files", tags=["files"])
@@ -79,3 +80,67 @@ async def list_files():
         files.append(doc)
         
     return files
+
+@router.get("/metrics")
+async def get_storage_metrics():
+    db = get_db()
+    pipeline = [
+        {"$group": {"_id": "$cloud_provider", "used_bytes": {"$sum": "$size_bytes"}}}
+    ]
+    cursor = db["files"].aggregate(pipeline)
+    
+    # Defaults/Limits in Bytes
+    GB = 1024 * 1024 * 1024
+    limits = {
+        "Google Drive": 15 * GB,
+        "Dropbox": 2 * GB,
+        "OneDrive": 5 * GB
+    }
+    
+    # Initialize with 0 usage
+    metrics = {
+        provider: {"used": 0, "total": limit}
+        for provider, limit in limits.items()
+    }
+    
+    async for doc in cursor:
+        provider = doc["_id"]
+        if provider in metrics:
+            metrics[provider]["used"] = doc["used_bytes"]
+            
+    return metrics
+
+@router.get("/integrations")
+async def get_integrations():
+    # Check Google Drive status
+    gdrive_connected = os.path.exists("token.json")
+    gdrive_has_creds = os.path.exists("credentials.json")
+    
+    status = "Connected" if gdrive_connected else ("Pending Authentication" if gdrive_has_creds else "Not Configured")
+    
+    return [
+        {
+            "id": "Google Drive",
+            "status": status,
+            "has_credentials": gdrive_has_creds
+        },
+        {
+            "id": "Dropbox",
+            "status": "Not Configured",
+            "has_credentials": False
+        },
+        {
+            "id": "OneDrive",
+            "status": "Not Configured",
+            "has_credentials": False
+        }
+    ]
+
+@router.post("/integrations/disconnect")
+async def disconnect_integration(provider: dict):
+    if provider.get("id") == "Google Drive":
+        if os.path.exists("token.json"):
+            os.remove("token.json")
+            return {"message": "Disconnected Google Drive"}
+        return {"message": "Already disconnected"}
+    raise HTTPException(status_code=400, detail="Cannot disconnect this provider")

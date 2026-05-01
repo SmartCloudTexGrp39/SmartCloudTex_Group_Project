@@ -101,3 +101,59 @@ export async function uploadFile(file: File, token: string, tags: string = '') {
 
   return await response.json();
 }
+
+export async function fetchMetrics() {
+  try {
+    const response = await fetch(`${API_URL}/files/metrics`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to fetch metrics: ', response.statusText);
+      return null;
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching metrics:', error);
+    return null;
+  }
+}
+
+export async function fetchIntegrations() {
+  try {
+    const response = await fetch(`${API_URL}/files/integrations`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching integrations:', error);
+    return [];
+  }
+}
+
+export async function disconnectIntegration(providerId: string) {
+  const response = await fetch(`${API_URL}/files/integrations/disconnect`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id: providerId })
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to disconnect');
+  }
+
+  return await response.json();
+}
