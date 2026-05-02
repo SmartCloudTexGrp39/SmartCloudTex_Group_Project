@@ -17,11 +17,12 @@ import {
   Download,
   Share2,
   HardDrive,
-  Server
+  Server,
+  X
 } from 'lucide-react';
 
 import { useRouter } from 'next/navigation';
-import { fetchFiles, fetchMetrics } from '../api';
+import { fetchFiles, fetchMetrics, downloadFile, deleteFile, shareFile } from '../api';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -56,6 +57,43 @@ export default function DashboardPage() {
 
     loadFiles();
   }, []);
+
+  const handleDownload = async (fileId: string, filename: string) => {
+    try {
+      await downloadFile(fileId, filename);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download file");
+    }
+  };
+
+  const handleDelete = async (fileId: string) => {
+    if (!window.confirm("Are you sure you want to delete this file from both the database and cloud storage?")) return;
+    try {
+      const token = localStorage.getItem('token') || '';
+      await deleteFile(fileId, token);
+      
+      // Refresh files and metrics
+      const data = await fetchFiles();
+      const sorted = data.sort((a: any, b: any) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
+      setRecentFiles(sorted.slice(0, 5));
+      
+      const metricsData = await fetchMetrics();
+      if (metricsData) setStorageMetrics(metricsData);
+    } catch (err: any) {
+      alert(err.message || "Failed to delete file");
+    }
+  };
+
+  const handleShare = async (fileId: string) => {
+    try {
+      const result = await shareFile(fileId);
+      navigator.clipboard.writeText(result.share_url);
+      alert(`Share link copied to clipboard: ${result.share_url}`);
+    } catch (err) {
+      alert("Failed to generate share link");
+    }
+  };
 
   const formatSize = (bytes: number) => {
     if (!bytes) return '0 B';
@@ -297,12 +335,29 @@ export default function DashboardPage() {
                       <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{file.cloud_provider}</span>
                     </div>
                     <div className="flex gap-1">
-                      <IconButton size="small" className="text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                      <IconButton 
+                        size="small" 
+                        className="text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        onClick={() => handleDownload(file._id, file.filename)}
+                      >
                         <Download size={18} />
                       </IconButton>
-                      <IconButton size="small" className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                      <IconButton 
+                        size="small" 
+                        className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                        onClick={() => handleShare(file._id)}
+                      >
                         <Share2 size={18} />
                       </IconButton>
+                      {role === 'Admin' && (
+                        <IconButton 
+                          size="small" 
+                          className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          onClick={() => handleDelete(file._id)}
+                        >
+                          <X size={18} />
+                        </IconButton>
+                      )}
                     </div>
                   </div>
                 </div>

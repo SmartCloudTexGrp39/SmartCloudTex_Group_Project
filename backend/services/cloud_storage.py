@@ -62,4 +62,10 @@ class GoogleDriveService:
             status, done = downloader.next_chunk()
         return fh.getvalue()
 
+    def delete_file(self, file_id: str):
+        if not self.service:
+            print("Google Drive service not authenticated, mocking delete.")
+            return
+        self.service.files().delete(fileId=file_id).execute()
+
 gdrive_service = GoogleDriveService()

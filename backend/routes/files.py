@@ -8,6 +8,11 @@ from database import get_db
 import io
 import os
 import datetime
+from fastapi.responses import Response
+from bson import ObjectId
+from services.cloud_storage import gdrive_service
+from services.dropbox_storage import dropbox_service
+from services.onedrive_storage import onedrive_service
 
 router = APIRouter(prefix="/files", tags=["files"])
 
@@ -81,6 +86,80 @@ async def list_files():
         
     return files
 
+@router.get("/download/{file_id}")
+async def download_file(file_id: str):
+    db = get_db()
+    try:
+        file_record = await db["files"].find_one({"_id": ObjectId(file_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid file ID format")
+        
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    provider = file_record["cloud_provider"]
+    cloud_id = file_record["cloud_id"]
+    filename = file_record["filename"]
+    mime_type = file_record.get("mime_type", "application/octet-stream")
+    
+    print(f"Downloading {filename} from {provider}...")
+    
+    content = b""
+    try:
+        if provider == "Google Drive":
+            content = gdrive_service.download_file(cloud_id)
+        elif provider == "Dropbox":
+            content = dropbox_service.download_file(cloud_id)
+        elif provider == "OneDrive":
+            content = onedrive_service.download_file(cloud_id)
+    except Exception as e:
+        print(f"Download error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch from {provider}")
+        
+    return Response(
+        content=content,
+        media_type=mime_type,
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@router.delete("/{file_id}")
+async def delete_file(file_id: str, current_user: UserInDB = Depends(check_role(Role.ADMIN))):
+    db = get_db()
+    try:
+        file_record = await db["files"].find_one({"_id": ObjectId(file_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid file ID format")
+
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    provider = file_record["cloud_provider"]
+    cloud_id = file_record["cloud_id"]
+    
+    # 1. Delete from Cloud
+    try:
+        if provider == "Google Drive":
+            gdrive_service.delete_file(cloud_id)
+        elif provider == "Dropbox":
+            dropbox_service.delete_file(cloud_id)
+        elif provider == "OneDrive":
+            onedrive_service.delete_file(cloud_id)
+    except Exception as e:
+        print(f"Cloud delete error (continuing with DB delete): {e}")
+        
+    # 2. Delete from DB
+    await db["files"].delete_one({"_id": ObjectId(file_id)})
+    
+    return {"message": "File deleted successfully"}
+
+@router.post("/share/{file_id}")
+async def share_file(file_id: str):
+    # Simulated sharing link logic
+    return {
+        "message": "Public share link generated",
+        "share_url": f"http://localhost:8000/files/download/{file_id}"
+    }
+
 @router.get("/metrics")
 async def get_storage_metrics():
     db = get_db()
@@ -115,32 +194,48 @@ async def get_integrations():
     # Check Google Drive status
     gdrive_connected = os.path.exists("token.json")
     gdrive_has_creds = os.path.exists("credentials.json")
+    gdrive_status = "Connected" if gdrive_connected else ("Pending Authentication" if gdrive_has_creds else "Not Configured")
     
-    status = "Connected" if gdrive_connected else ("Pending Authentication" if gdrive_has_creds else "Not Configured")
+    # Check Dropbox status
+    dbx_connected = os.path.exists("dropbox_token.json")
+    dbx_status = "Connected" if dbx_connected else "Not Configured"
+    
+    # Check OneDrive status
+    odrv_connected = os.path.exists("onedrive_token.json")
+    odrv_status = "Connected" if odrv_connected else "Not Configured"
     
     return [
         {
             "id": "Google Drive",
-            "status": status,
+            "status": gdrive_status,
             "has_credentials": gdrive_has_creds
         },
         {
             "id": "Dropbox",
-            "status": "Not Configured",
-            "has_credentials": False
+            "status": dbx_status,
+            "has_credentials": True
         },
         {
             "id": "OneDrive",
-            "status": "Not Configured",
-            "has_credentials": False
+            "status": odrv_status,
+            "has_credentials": True
         }
     ]
 
 @router.post("/integrations/disconnect")
 async def disconnect_integration(provider: dict):
-    if provider.get("id") == "Google Drive":
-        if os.path.exists("token.json"):
-            os.remove("token.json")
-            return {"message": "Disconnected Google Drive"}
+    provider_id = provider.get("id")
+    file_map = {
+        "Google Drive": "token.json",
+        "Dropbox": "dropbox_token.json",
+        "OneDrive": "onedrive_token.json"
+    }
+    
+    if provider_id in file_map:
+        token_file = file_map[provider_id]
+        if os.path.exists(token_file):
+            os.remove(token_file)
+            return {"message": f"Disconnected {provider_id}"}
         return {"message": "Already disconnected"}
+        
     raise HTTPException(status_code=400, detail="Cannot disconnect this provider")

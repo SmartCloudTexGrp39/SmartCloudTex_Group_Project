@@ -38,8 +38,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return UserInDB(**user)
 
 def check_role(required_role: Role):
+    role_hierarchy = {
+        Role.ADMIN: 3,
+        Role.SUPERVISOR: 2,
+        Role.STAFF: 1
+    }
+    
     async def role_checker(current_user: UserInDB = Depends(get_current_user)):
-        if current_user.role != required_role and current_user.role != Role.ADMIN:
+        user_level = role_hierarchy.get(current_user.role, 0)
+        required_level = role_hierarchy.get(required_role, 0)
+        
+        if user_level < required_level:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough privileges"

@@ -29,11 +29,13 @@ import {
   Copy,
   CloudUpload
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { uploadFile } from '../../api';
 
 const steps = ['Select File', 'Smart Analysis', 'Final Routing'];
 
 export default function UploadPage() {
+  const router = useRouter();
   const [activeStep, setActiveStep] = React.useState(0);
   const [isUploading, setIsUploading] = React.useState(false);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
@@ -273,6 +275,7 @@ export default function UploadPage() {
                   Upload Another
                 </Button>
                 <Button
+                  onClick={() => router.push('/dashboard')}
                   className="bg-slate-900 dark:bg-white dark:text-slate-950 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl px-10 py-3 font-bold"
                 >
                   View in Dashboard

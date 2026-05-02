@@ -1,6 +1,8 @@
 # Sensitive Google API files
 backend/token.json
 backend/credentials.json
+backend/dropbox_token.json
+backend/onedrive_token.json
 
 # Environment variables
 backend/.env

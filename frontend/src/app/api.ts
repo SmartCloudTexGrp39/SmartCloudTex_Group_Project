@@ -157,3 +157,39 @@ export async function disconnectIntegration(providerId: string) {
 
   return await response.json();
 }
+
+export async function downloadFile(fileId: string, filename: string) {
+  const response = await fetch(`${API_URL}/files/download/${fileId}`);
+  if (!response.ok) throw new Error("Download failed");
+  
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+export async function deleteFile(fileId: string, token: string) {
+  const response = await fetch(`${API_URL}/files/${fileId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail || "Delete failed");
+  }
+  return await response.json();
+}
+
+export async function shareFile(fileId: string) {
+  const response = await fetch(`${API_URL}/files/share/${fileId}`, {
+    method: 'POST'
+  });
+  if (!response.ok) throw new Error("Share failed");
+  return await response.json();
+}

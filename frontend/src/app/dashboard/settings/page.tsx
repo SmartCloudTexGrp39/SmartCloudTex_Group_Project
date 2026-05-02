@@ -103,23 +103,17 @@ export default function SettingsPage() {
                       >
                         Disconnect Account
                       </Button>
-                    ) : integration.status === 'Pending Authentication' ? (
+                    ) : (
                       <div className="bg-slate-900 rounded-xl p-3 text-left w-full max-w-sm border border-slate-800 shadow-inner">
                         <Typography variant="caption" className="text-slate-400 font-mono block mb-1">
                           Run locally to authenticate:
                         </Typography>
                         <code className="text-emerald-400 font-mono text-sm block font-bold">
-                          python setup_gdrive.py
+                          {integration.id === 'Google Drive' ? 'python setup_gdrive.py' :
+                           integration.id === 'Dropbox' ? 'python setup_dropbox.py' :
+                           'python setup_onedrive.py'}
                         </code>
                       </div>
-                    ) : (
-                      <Button 
-                        variant="contained" 
-                        disabled
-                        className="rounded-xl font-bold bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500 normal-case px-6 py-2"
-                      >
-                        Coming Soon
-                      </Button>
                     )}
                   </div>
                 </div>
