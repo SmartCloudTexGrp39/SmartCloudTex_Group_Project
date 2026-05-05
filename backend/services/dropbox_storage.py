@@ -22,7 +22,8 @@ class DropboxService:
                 self.dbx = dropbox.Dropbox(
                     oauth2_refresh_token=data['refresh_token'],
                     app_key=data['app_key'],
-                    app_secret=data['app_secret']
+                    app_secret=data['app_secret'],
+                    timeout=120 # Increase timeout for large files
                 )
                 
                 # Test connection
@@ -46,22 +47,30 @@ class DropboxService:
         try:
             file_stream.seek(0)
             file_content = file_stream.read()
-            
-            # Standard upload for files up to 150MB
-            # We use a leading slash as Dropbox paths must be absolute within the app namespace
             dropbox_path = f"/{filename}"
             
-            print(f"Uploading {filename} to Dropbox...")
-            res = self.dbx.files_upload(
-                file_content, 
-                dropbox_path, 
-                mode=dropbox.files.WriteMode.overwrite
-            )
+            print(f"Uploading {filename} to Dropbox (with retry)...")
             
-            print(f"Successfully uploaded to Dropbox. ID: {res.id}")
-            return res.id
+            # Simple retry logic for SSL/Network issues
+            for attempt in range(3):
+                try:
+                    res = self.dbx.files_upload(
+                        file_content, 
+                        dropbox_path, 
+                        mode=dropbox.files.WriteMode.overwrite
+                    )
+                    print(f"Successfully uploaded to Dropbox. ID: {res.id}")
+                    return res.id
+                except Exception as e:
+                    if attempt < 2:
+                        print(f"Dropbox upload attempt {attempt+1} failed: {e}. Retrying...")
+                        import time
+                        time.sleep(2)
+                    else:
+                        raise e
+                        
         except Exception as e:
-            print(f"[ERROR] Dropbox upload failed: {e}")
+            print(f"[ERROR] Dropbox upload failed after retries: {e}")
             return f"error_dbx_{os.urandom(4).hex()}"
 
     def download_file(self, file_id: str) -> bytes:

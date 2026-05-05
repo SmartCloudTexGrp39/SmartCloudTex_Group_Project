@@ -47,6 +47,7 @@ export default function UploadPage() {
 
   // Analysis result from the backend
   const [analysis, setAnalysis] = React.useState<{ tags: string[], route: string, duplicate?: boolean } | null>(null);
+  const [duplicateId, setDuplicateId] = React.useState<string | null>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -98,10 +99,11 @@ export default function UploadPage() {
       setIsAnalyzing(false);
       
       if (response.is_duplicate) {
+        setDuplicateId(response.file_id);
         setShowDuplicateModal(true);
       } else {
-        // Automatically move to final step if not duplicate
-        setTimeout(() => setActiveStep(2), 1000);
+        // Restore automatic timer with increased duration (3 seconds)
+        setTimeout(() => setActiveStep(3), 3000);
       }
     } catch (err: any) {
       console.error(err);
@@ -114,7 +116,18 @@ export default function UploadPage() {
 
   const handleResolveDuplicate = (option: string) => {
     setShowDuplicateModal(false);
-    setActiveStep(2);
+    if (option === 'replace' || option === 'version') {
+      setActiveStep(2);
+    } else if (option === 'skip') {
+      setActiveStep(0);
+      setSelectedFile(null);
+      setAnalysis(null);
+    }
+  };
+
+  const handleViewExisting = () => {
+    setShowDuplicateModal(false);
+    router.push('/dashboard');
   };
 
   return (
@@ -236,8 +249,13 @@ export default function UploadPage() {
                   )}
 
                   {!analysis?.duplicate && !error && (
-                     <div className="flex gap-4 justify-center mt-4">
-                       <Typography className="text-slate-500">Processing route confirmation...</Typography>
+                     <div className="flex gap-4 justify-center mt-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <CheckCircle2 className="text-emerald-500 animate-bounce" size={32} />
+                          <Typography className="text-emerald-600 font-bold animate-pulse">
+                            Routing to {analysis?.route}...
+                          </Typography>
+                        </div>
                      </div>
                   )}
                   {error && (
@@ -256,16 +274,26 @@ export default function UploadPage() {
             </div>
           )}
 
-          {activeStep === 2 && (
+          {activeStep >= 2 && (
             <div className="text-center space-y-6 animate-in-slide-up">
               <div className="w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center text-white mx-auto shadow-xl shadow-emerald-500/20">
                 <CheckCircle2 size={48} />
               </div>
               <div>
                 <Typography variant="h5" className="font-bold text-slate-800 dark:text-white">File Successfully Routed</Typography>
-                <Typography variant="body2" className="text-slate-500 mt-2">
-                  Stored in <span className="text-blue-500 font-bold">{analysis?.route}</span> • Classified as <span className="text-emerald-500 font-bold">{analysis?.tags.join(', ')}</span>
+                <Typography variant="body2" className="text-slate-500 mt-2 mb-4">
+                  Stored in <span className="text-blue-500 font-bold">{analysis?.route}</span>
                 </Typography>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {analysis?.tags.map(tag => (
+                    <Chip 
+                      key={tag} 
+                      label={tag} 
+                      size="small"
+                      className="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 font-bold rounded-lg border border-emerald-200/50" 
+                    />
+                  ))}
+                </div>
               </div>
               <div className="flex gap-4 justify-center pt-4">
                 <Button
@@ -307,7 +335,7 @@ export default function UploadPage() {
         </DialogTitle>
         <DialogContent className="p-4">
           <Typography variant="body2" className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-            A file with the exact same content already exists in your <span className="font-bold text-slate-800 dark:text-slate-200">Google Drive</span>. How would you like to proceed?
+            A file with the exact same content already exists in your <span className="font-bold text-slate-800 dark:text-slate-200">{analysis?.route}</span>. How would you like to proceed?
           </Typography>
 
           <div className="space-y-3">
@@ -352,7 +380,7 @@ export default function UploadPage() {
           </div>
         </DialogContent>
         <DialogActions className="p-4 pt-0">
-          <Button onClick={() => setShowDuplicateModal(false)} className="w-full text-slate-500 font-bold normal-case hover:bg-transparent">
+          <Button onClick={handleViewExisting} className="w-full text-blue-500 font-bold normal-case hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-xl py-2">
             View existing file details
           </Button>
         </DialogActions>

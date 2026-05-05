@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { NextAppDirEmotionCacheProvider } from './EmotionCache';
 
 const lightTheme = createTheme({
   palette: {
@@ -61,11 +62,14 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
   );
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-    </ColorModeContext.Provider>
+    <NextAppDirEmotionCacheProvider options={{ key: 'mui' }}>
+      <ColorModeContext.Provider value={colorMode}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          {children}
+        </ThemeProvider>
+      </ColorModeContext.Provider>
+    </NextAppDirEmotionCacheProvider>
   );
 }
+

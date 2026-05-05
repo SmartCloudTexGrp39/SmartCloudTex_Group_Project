@@ -15,6 +15,26 @@ except ImportError:
 
 CANDIDATE_LABELS = ["invoice", "design pattern", "supplier contract", "financial report", "employee record", "shipping document"]
 
+def generate_keyword_tags(filename: str, text: str) -> list[str]:
+    """Lightweight fallback for tagging when AI models are unavailable."""
+    keywords = {
+        "Invoice": ["invoice", "billing", "payment", "amount", "tax", "bill", "receipt", "total"],
+        "Design": ["design", "pattern", "fabric", "textile", "sketch", "color", "texture", "motif", "print", "weave"],
+        "Contract": ["contract", "agreement", "legal", "terms", "signed", "policy", "clause", "witness"],
+        "Report": ["report", "financial", "analysis", "data", "summary", "monthly", "quarterly", "annual", "audit"],
+        "Shipping": ["shipping", "delivery", "tracking", "logistics", "freight", "courier", "export", "import", "customs"],
+        "Vendor": ["vendor", "supplier", "factory", "manufacturing", "production", "raw material", "source"],
+        "Inventory": ["stock", "inventory", "warehouse", "sku", "quantity", "unit", "batch", "reorder"],
+        "Customer": ["client", "customer", "order", "purchase", "buyer", "retail", "wholesale"],
+        "Compliance": ["cert", "certification", "iso", "standard", "compliance", "regulation", "quality control", "qc"]
+    }
+    tags = []
+    content = (filename + " " + text).lower()
+    for tag, keys in keywords.items():
+        if any(k in content for k in keys):
+            tags.append(tag)
+    return tags if tags else ["General"]
+
 def extract_text_from_bytes(file_bytes: bytes, mime_type: str) -> str:
     """Extracts text from various file formats for NLP processing."""
     text = ""
@@ -35,8 +55,9 @@ def extract_text_from_bytes(file_bytes: bytes, mime_type: str) -> str:
 def generate_ai_tags(file_bytes: bytes, filename: str, mime_type: str) -> list[str]:
     """Uses zero-shot classification to categorize documents based on their text."""
     if not classifier:
-        print("NLP Classifier not loaded. Returning empty tags.")
-        return []
+        print("NLP Classifier not loaded. Using keyword-based fallback.")
+        text = extract_text_from_bytes(file_bytes, mime_type)
+        return generate_keyword_tags(filename, text)
 
     text = extract_text_from_bytes(file_bytes, mime_type)
     

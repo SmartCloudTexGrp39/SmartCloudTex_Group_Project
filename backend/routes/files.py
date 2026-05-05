@@ -63,11 +63,11 @@ async def upload_file(
         return {
             "message": "File processed successfully" if existing_file else "File uploaded successfully",
             "is_duplicate": bool(existing_file),
-            "file_id": str(result.inserted_id),
+            "file_id": str(existing_file["_id"]) if existing_file else str(result.inserted_id),
             "cloud_id": cloud_id,
             "cloud_provider": cloud_provider,
             "size_bytes": file_size,
-            "tags": file_record["tags"]
+            "tags": file_record["tags"] if not existing_file else existing_file["tags"]
         }
     except Exception as e:
         import traceback
