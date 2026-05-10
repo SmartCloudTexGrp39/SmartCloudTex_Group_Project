@@ -10,7 +10,8 @@ try:
     # NOTE: In production, load this once globally or asynchronously so it doesn't block startup
     # Using a lightweight model for MVP
     classifier = pipeline("zero-shot-classification", model="valhalla/distilbart-mnli-12-3")
-except ImportError:
+except Exception as e:
+    print(f"Warning: NLP models could not be loaded ({str(e)}). Falling back to keyword classification.")
     classifier = None
 
 CANDIDATE_LABELS = ["invoice", "design pattern", "supplier contract", "financial report", "employee record", "shipping document"]
