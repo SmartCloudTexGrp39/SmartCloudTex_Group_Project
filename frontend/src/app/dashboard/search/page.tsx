@@ -24,18 +24,26 @@ import {
 } from 'lucide-react';
 import { fetchFiles } from '../../api';
 
+interface CloudFile {
+  filename: string;
+  upload_date: string;
+  size_bytes: number;
+  cloud_provider: string;
+  tags?: string[];
+}
+
 export default function SearchPage() {
   const [query, setQuery] = React.useState('');
   const [activeFilters, setActiveFilters] = React.useState(['Google Drive', 'Design']);
 
-  const [allFiles, setAllFiles] = React.useState<any[]>([]);
+  const [allFiles, setAllFiles] = React.useState<CloudFile[]>([]);
 
   React.useEffect(() => {
     const loadFiles = async () => {
       try {
-        const data = await fetchFiles();
+        const data = await fetchFiles() as CloudFile[];
         // Sort newest first
-        const sorted = data.sort((a: any, b: any) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
+        const sorted = data.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
         setAllFiles(sorted);
       } catch (err) {
         console.error("Failed to load files", err);
