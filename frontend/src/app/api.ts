@@ -193,3 +193,9 @@ export async function shareFile(fileId: string) {
   if (!response.ok) throw new Error("Share failed");
   return await response.json();
 }
+
+export async function searchFiles(query: string) {
+  const response = await fetch(`${API_URL}/files/semantic-search?query=${encodeURIComponent(query)}`);
+  if (!response.ok) throw new Error("Search failed");
+  return await response.json();
+}

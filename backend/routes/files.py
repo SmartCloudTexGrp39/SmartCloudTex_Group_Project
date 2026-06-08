@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from models.user import UserInDB, Role
 from routes.auth import get_current_user, check_role
 from services.routing import route_file_upload
-from services.ai_service import generate_ai_tags
+from services.ai_service import generate_ai_tags, generate_embedding, embedder
 from utils.hashing import generate_file_hash
 from database import get_db
 import io
@@ -46,6 +46,9 @@ async def upload_file(
         ai_tags = generate_ai_tags(contents, file.filename, file.content_type)
         combined_tags = list(set([tag.strip().lower() for tag in user_tags + ai_tags if tag.strip()]))
         
+        # Generate semantic embedding
+        embedding = generate_embedding(contents, file.filename, file.content_type)
+        
         file_record = {
             "filename": file.filename,
             "cloud_provider": cloud_provider,
@@ -55,7 +58,8 @@ async def upload_file(
             "upload_date": datetime.datetime.utcnow(),
             "size_bytes": file_size,
             "mime_type": file.content_type,
-            "tags": combined_tags
+            "tags": combined_tags,
+            "embedding": embedding
         }
         
         result = await db["files"].insert_one(file_record)
@@ -77,7 +81,7 @@ async def upload_file(
 @router.get("/list")
 async def list_files():
     db = get_db()
-    cursor = db["files"].find()
+    cursor = db["files"].find({}, {"embedding": 0}) # Exclude embedding to save bandwidth
     
     files = []
     async for doc in cursor:
@@ -85,6 +89,60 @@ async def list_files():
         files.append(doc)
         
     return files
+
+@router.get("/semantic-search")
+async def semantic_search(query: str):
+    if not embedder:
+        raise HTTPException(status_code=501, detail="Semantic search is not enabled (missing model).")
+        
+    try:
+        from sklearn.metrics.pairwise import cosine_similarity
+        import numpy as np
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Missing required libraries for vector search.")
+        
+    db = get_db()
+    
+    # Generate embedding for the query
+    try:
+        query_vector = embedder.encode(query).tolist()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to encode query: {e}")
+        
+    # Fetch all files that have an embedding
+    cursor = db["files"].find({"embedding": {"$exists": True, "$ne": []}})
+    
+    files = []
+    async for doc in cursor:
+        files.append(doc)
+        
+    if not files:
+        return []
+        
+    # Extract embeddings and calculate similarities
+    embeddings_list = [f["embedding"] for f in files]
+    
+    # Calculate cosine similarity between query and all stored embeddings
+    similarities = cosine_similarity([query_vector], embeddings_list)[0]
+    
+    # Attach similarities to files and sort
+    results = []
+    for i, file_doc in enumerate(files):
+        # We only want to return relevant results (threshold can be adjusted)
+        score = float(similarities[i])
+        if score > 0.1: # Threshold to filter out completely irrelevant documents
+            file_doc["_id"] = str(file_doc["_id"])
+            file_doc["relevance_score"] = score
+            # Remove embedding before sending to client
+            if "embedding" in file_doc:
+                del file_doc["embedding"]
+            results.append(file_doc)
+            
+    # Sort by relevance score, descending
+    results.sort(key=lambda x: x["relevance_score"], reverse=True)
+    
+    # Return top 20 results
+    return results[:20]
 
 @router.get("/download/{file_id}")
 async def download_file(file_id: str):

@@ -14,6 +14,16 @@ except Exception as e:
     print(f"Warning: NLP models could not be loaded ({str(e)}). Falling back to keyword classification.")
     classifier = None
 
+try:
+    from sentence_transformers import SentenceTransformer
+    # Load embedding model for semantic search
+    print("Loading SentenceTransformer model...")
+    embedder = SentenceTransformer('all-MiniLM-L6-v2')
+    print("SentenceTransformer loaded.")
+except Exception as e:
+    print(f"Warning: SentenceTransformer could not be loaded ({str(e)}). Semantic search will use keywords only.")
+    embedder = None
+
 CANDIDATE_LABELS = ["invoice", "design pattern", "supplier contract", "financial report", "employee record", "shipping document"]
 
 def generate_keyword_tags(filename: str, text: str) -> list[str]:
@@ -73,4 +83,18 @@ def generate_ai_tags(file_bytes: bytes, filename: str, mime_type: str) -> list[s
         return tags
     except Exception as e:
         print(f"NLP classification failed: {str(e)}")
+        return []
+
+def generate_embedding(file_bytes: bytes, filename: str, mime_type: str) -> list[float]:
+    """Generates a vector embedding for the given file."""
+    if not embedder:
+        return []
+    try:
+        text = extract_text_from_bytes(file_bytes, mime_type)
+        target_text = text if text.strip() else filename
+        # Generate embedding and convert numpy array to list of floats
+        embedding = embedder.encode(target_text)
+        return embedding.tolist()
+    except Exception as e:
+        print(f"Embedding generation failed: {str(e)}")
         return []

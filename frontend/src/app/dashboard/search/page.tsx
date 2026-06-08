@@ -20,9 +20,10 @@ import {
   FileText,
   Calendar,
   Tag,
-  ArrowRight
+  ArrowRight,
+  Zap
 } from 'lucide-react';
-import { fetchFiles } from '../../api';
+import { fetchFiles, searchFiles } from '../../api';
 
 interface CloudFile {
   filename: string;
@@ -37,6 +38,8 @@ export default function SearchPage() {
   const [activeFilters, setActiveFilters] = React.useState(['Google Drive', 'Design']);
 
   const [allFiles, setAllFiles] = React.useState<CloudFile[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
+  const [error, setError] = React.useState('');
 
   React.useEffect(() => {
     const loadFiles = async () => {
@@ -49,8 +52,31 @@ export default function SearchPage() {
         console.error("Failed to load files", err);
       }
     };
-    loadFiles();
-  }, []);
+    if (query === '') {
+      loadFiles();
+    }
+  }, [query]);
+
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+    setIsSearching(true);
+    setError('');
+    try {
+      const results = await searchFiles(query);
+      setAllFiles(results);
+    } catch (err) {
+      console.error("Semantic search failed", err);
+      setError("Semantic search is currently unavailable. Falling back to local search.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   const formatSize = (bytes: number) => {
     if (!bytes) return '0 B';
@@ -86,7 +112,7 @@ export default function SearchPage() {
         (file.tags && file.tags.map((t: string) => t.toLowerCase()).includes(filter.toLowerCase()))
       );
       
-    return matchesQuery && matchesFilters;
+    return matchesFilters; // Ignore local query match if backend handled it, but still apply filters
   });
 
   const clouds = ['Google Drive', 'Dropbox', 'OneDrive'];
@@ -118,14 +144,22 @@ export default function SearchPage() {
             className="flex-1 px-2 font-medium text-lg dark:text-white"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <Button 
             variant="contained" 
-            className="bg-blue-600 hover:bg-blue-700 rounded-2xl px-8 py-3 font-bold normal-case shadow-lg shadow-blue-500/20"
+            onClick={handleSearch}
+            disabled={isSearching}
+            className="bg-blue-600 hover:bg-blue-700 rounded-2xl px-8 py-3 font-bold normal-case shadow-lg shadow-blue-500/20 disabled:opacity-50"
           >
-            Search
+            {isSearching ? 'Searching...' : 'Search'}
           </Button>
         </Paper>
+        {error && (
+          <Typography variant="body2" className="text-red-500 mt-2 text-center">
+            {error}
+          </Typography>
+        )}
       </div>
 
       <div className="flex flex-col gap-8">
@@ -196,6 +230,13 @@ export default function SearchPage() {
                             />
                           ))}
                         </div>
+                        {/* @ts-ignore */}
+                        {result.relevance_score && (
+                          <div className="flex items-center gap-1 text-emerald-500 font-bold ml-2 bg-emerald-50 px-2 py-0.5 rounded-lg">
+                            <Zap size={12} className="animate-pulse" />
+                            <span className="text-[11px]">{(result as any).relevance_score.toFixed(2)}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

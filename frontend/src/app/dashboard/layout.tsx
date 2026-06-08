@@ -141,10 +141,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <Divider className="bg-white/5 mb-4" />
         <ListItemButton onClick={handleLogout} className="rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all py-3">
-          <ListItemIcon className="text-rose-400 min-w-[40px]">
-            <LogOut size={20} />
+          <ListItemIcon sx={{ color: 'inherit', minWidth: '40px' }}>
+            <LogOut size={20} className="text-rose-400" />
           </ListItemIcon>
-          <ListItemText primary="Logout" primaryTypographyProps={{ className: 'font-semibold text-sm' }} />
+          <ListItemText primary="Logout" primaryTypographyProps={{ className: 'font-semibold text-sm text-rose-400' }} />
         </ListItemButton>
       </Box>
     </div>
