@@ -105,8 +105,23 @@ export default function DashboardPage() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // MongoDB returns UTC datetimes without a 'Z' suffix.
+    // Appending 'Z' ensures JavaScript parses it as UTC before
+    // converting to Sri Lanka local time (Asia/Colombo, UTC+5:30).
+    const utcString = dateString.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(dateString)
+      ? dateString
+      : dateString + 'Z';
+    const date = new Date(utcString);
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: 'Asia/Colombo',
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    };
+    return date.toLocaleString('en-LK', options);
   };
 
   const getDynamicStats = () => {
@@ -168,7 +183,7 @@ export default function DashboardPage() {
     'Order': 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
     'Compliance': 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
     'Contract': 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
-    'Inventory': 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+    'Inventory': 'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-300',
   };
 
   return (
@@ -176,10 +191,10 @@ export default function DashboardPage() {
       {/* Header Section */}
       <Box className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <Typography variant="h4" className="font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">
+          <Typography variant="h4" className="font-extrabold text-stone-900 dark:text-white mb-2 tracking-tight">
             Dashboard Overview
           </Typography>
-          <Typography variant="body1" className="text-slate-500 dark:text-slate-400 font-medium">
+          <Typography variant="body1" className="text-stone-500 dark:text-stone-400 font-medium">
             Manage your synchronized textile assets across multiple clouds.
           </Typography>
         </div>
@@ -196,7 +211,7 @@ export default function DashboardPage() {
       {/* Storage Cards Grid */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <Typography variant="h6" className="font-bold text-slate-800 dark:text-slate-100">
+          <Typography variant="h6" className="font-bold text-stone-800 dark:text-stone-100">
             Connected Storage
           </Typography>
           {role === 'Admin' && (
@@ -212,7 +227,7 @@ export default function DashboardPage() {
         <Grid container spacing={4}>
           {stats.map((stat, index) => (
             <Grid size={{ xs: 12, md: 4 }} key={index}>
-              <Paper elevation={0} className="glass-card p-6 border-slate-200/50 dark:border-white/5 hover:border-blue-500/30 transition-all group overflow-hidden relative">
+              <Paper elevation={0} className="glass-card p-6 border-stone-200/50 dark:border-white/5 hover:border-blue-500/30 transition-all group overflow-hidden relative">
                 {/* Decorative Background Glow */}
                 <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-10 blur-3xl ${stat.color} group-hover:opacity-20 transition-opacity`} />
 
@@ -220,20 +235,20 @@ export default function DashboardPage() {
                   <div className={`p-4 rounded-2xl shadow-lg bg-gradient-to-br ${stat.gradient}`}>
                     {stat.icon}
                   </div>
-                  <IconButton size="small" className="text-slate-400">
+                  <IconButton size="small" className="text-stone-400">
                     <MoreVertical size={18} />
                   </IconButton>
                 </div>
 
-                <Typography variant="h6" className="font-bold !text-black dark:text-white mb-1">
+                <Typography variant="h6" className="font-bold !text-stone-900 dark:text-white mb-1">
                   {stat.title}
                 </Typography>
 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <Typography variant="h4" className="font-black !text-black dark:text-white">
+                  <Typography variant="h4" className="font-black !text-stone-900 dark:text-white">
                     {stat.used}
                   </Typography>
-                  <Typography variant="body2" className="text-slate-500 font-medium">
+                  <Typography variant="body2" className="text-stone-500 font-medium">
                     / {stat.total}
                   </Typography>
                 </div>
@@ -241,12 +256,12 @@ export default function DashboardPage() {
                 {/* Progress Bar */}
                 <div className="mt-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usage Status</span>
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Usage Status</span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${stat.percentage > 90 ? 'text-rose-500' : 'text-blue-500'}`}>
                       {stat.percentage}% Full
                     </span>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-white/5 rounded-full h-2 shadow-inner">
+                  <div className="w-full bg-stone-100 dark:bg-white/5 rounded-full h-2 shadow-inner">
                     <div
                       className={`h-2 rounded-full transition-all duration-1000 bg-gradient-to-r ${stat.gradient} shadow-lg shadow-blue-500/20`}
                       style={{ width: `${stat.percentage}%` }}
@@ -270,45 +285,45 @@ export default function DashboardPage() {
       <div className="mt-10">
         <Box className="flex justify-between items-center mb-6">
           <div>
-            <Typography variant="h6" className="font-bold text-slate-800 dark:text-slate-100">
+            <Typography variant="h6" className="font-bold text-stone-800 dark:text-stone-100">
               Recent Activity
             </Typography>
-            <Typography variant="caption" className="text-slate-500 font-medium">
+            <Typography variant="caption" className="text-stone-500 font-medium">
               Files classified and routed by SmartCloud Engine
             </Typography>
           </div>
           <Button 
             variant="outlined" 
-            className="border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-slate-600 dark:text-slate-300 font-bold normal-case hover:bg-slate-50 dark:hover:bg-white/5"
+            className="border-stone-200 dark:border-white/10 rounded-xl px-4 py-2 text-stone-600 dark:text-stone-300 font-bold normal-case hover:bg-stone-50 dark:hover:bg-white/5"
             onClick={() => router.push('/dashboard/search')}
           >
             View All Files
           </Button>
         </Box>
 
-        <Paper elevation={0} className="glass-card border-slate-200/50 dark:border-white/5 overflow-hidden">
-          <div className="divide-y divide-slate-100 dark:divide-white/5">
+        <Paper elevation={0} className="glass-card border-stone-200/50 dark:border-white/5 overflow-hidden">
+          <div className="divide-y divide-stone-100 dark:divide-white/5">
             {recentFiles.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">No recent files found.</div>
+              <div className="p-8 text-center text-stone-500">No recent files found.</div>
             ) : (
               recentFiles.map((file, index) => (
-                <div key={index} className="flex flex-wrap md:flex-nowrap items-center justify-between p-5 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-all group">
+                <div key={index} className="flex flex-wrap md:flex-nowrap items-center justify-between p-5 hover:bg-stone-50/50 dark:hover:bg-white/5 transition-all group">
                   <div className="flex items-center gap-4 min-w-[300px]">
-                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-stone-900 border border-stone-100 dark:border-white/10 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
                       {file.mime_type?.includes('pdf') ? <FileText size={24} /> :
                        file.mime_type?.includes('spreadsheet') || file.mime_type?.includes('excel') ? <HardDrive size={24} /> :
                        <Server size={24} />}
                     </div>
                     <div>
-                      <Typography variant="subtitle2" className="font-bold !text-black dark:text-white leading-tight">
+                      <Typography variant="subtitle2" className="font-bold !text-stone-900 dark:text-white leading-tight">
                         {file.filename}
                       </Typography>
                       <div className="flex items-center gap-2 mt-1">
-                        <Typography variant="caption" className="text-slate-400 font-medium">
+                        <Typography variant="caption" className="text-stone-400 font-medium">
                           {formatSize(file.size_bytes)}
                         </Typography>
-                        <span className="w-1 h-1 rounded-full bg-slate-300" />
-                        <Typography variant="caption" className="text-slate-400 font-medium">
+                        <span className="w-1 h-1 rounded-full bg-stone-300" />
+                        <Typography variant="caption" className="text-stone-400 font-medium">
                           {formatDate(file.upload_date)}
                         </Typography>
                       </div>
@@ -321,30 +336,30 @@ export default function DashboardPage() {
                         key={tag}
                         label={tag}
                         size="small"
-                        className={`${tagColors[tag] || 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600'} rounded-lg font-bold text-[10px] h-6 px-1`}
+                        className={`${tagColors[tag] || 'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-200 dark:border-stone-600'} rounded-lg font-bold text-[10px] h-6 px-1`}
                       />
                     ))}
                     {(file.tags || []).length > 3 && (
-                      <Chip label={`+${file.tags.length - 3}`} size="small" className="bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600 rounded-lg font-bold text-[10px] h-6 px-1" />
+                      <Chip label={`+${file.tags.length - 3}`} size="small" className="bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-200 dark:border-stone-600 rounded-lg font-bold text-[10px] h-6 px-1" />
                     )}
                   </div>
 
                   <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 justify-end">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200/50 dark:border-white/10">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 dark:bg-white/5 border border-stone-200/50 dark:border-white/10">
                       <Cloud size={14} className="text-blue-500" />
-                      <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{file.cloud_provider}</span>
+                      <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400">{file.cloud_provider}</span>
                     </div>
                     <div className="flex gap-1">
                       <IconButton 
                         size="small" 
-                        className="text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        className="text-stone-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                         onClick={() => handleDownload(file._id, file.filename)}
                       >
                         <Download size={18} />
                       </IconButton>
                       <IconButton 
                         size="small" 
-                        className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                        className="text-stone-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"
                         onClick={() => handleShare(file._id)}
                       >
                         <Share2 size={18} />
@@ -352,7 +367,7 @@ export default function DashboardPage() {
                       {role === 'Admin' && (
                         <IconButton 
                           size="small" 
-                          className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          className="text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                           onClick={() => handleDelete(file._id)}
                         >
                           <X size={18} />

@@ -55,10 +55,10 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in-fade pb-10">
       <div>
-        <Typography variant="h4" className="font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">
+        <Typography variant="h4" className="font-extrabold text-stone-900 dark:text-white mb-2 tracking-tight">
           Integration Settings
         </Typography>
-        <Typography variant="body1" className="text-slate-500 dark:text-slate-400 font-medium">
+        <Typography variant="body1" className="text-stone-500 dark:text-stone-400 font-medium">
           Manage your connections to external cloud providers for seamless file routing.
         </Typography>
       </div>
@@ -66,19 +66,19 @@ export default function SettingsPage() {
       <Grid container spacing={4}>
         {integrations.length === 0 ? (
           <div className="w-full text-center py-12">
-            <Typography className="text-slate-500">Loading integrations...</Typography>
+            <Typography className="text-stone-500">Loading integrations...</Typography>
           </div>
         ) : (
           integrations.map((integration, idx) => (
             <Grid size={{ xs: 12 }} key={idx}>
-              <Paper elevation={0} className="glass-card p-6 border-slate-200/50 dark:border-white/5 relative overflow-hidden group">
+              <Paper elevation={0} className="glass-card p-6 border-stone-200/50 dark:border-white/5 relative overflow-hidden group">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   <div className="flex items-center gap-6">
-                    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 shadow-sm">
+                    <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-100 dark:border-white/10 shadow-sm">
                       {icons[integration.id]}
                     </div>
                     <div>
-                      <Typography variant="h6" className="font-bold text-slate-900 dark:text-white mb-1">
+                      <Typography variant="h6" className="font-bold text-stone-900 dark:text-white mb-1">
                         {integration.id}
                       </Typography>
                       <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export default function SettingsPage() {
                         ) : integration.status === 'Pending Authentication' ? (
                           <Chip icon={<Terminal size={14} className="!text-amber-500" />} label="Pending Authentication" size="small" className="bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/50 font-bold" />
                         ) : (
-                          <Chip icon={<XCircle size={14} className="!text-slate-400" />} label="Not Configured" size="small" className="bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 font-bold" />
+                          <Chip icon={<XCircle size={14} className="!text-stone-400" />} label="Not Configured" size="small" className="bg-stone-100 text-stone-600 border border-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:border-stone-700 font-bold" />
                         )}
                       </div>
                     </div>
@@ -104,8 +104,8 @@ export default function SettingsPage() {
                         Disconnect Account
                       </Button>
                     ) : (
-                      <div className="bg-slate-900 rounded-xl p-3 text-left w-full max-w-sm border border-slate-800 shadow-inner">
-                        <Typography variant="caption" className="text-slate-400 font-mono block mb-1">
+                      <div className="bg-stone-900 rounded-xl p-3 text-left w-full max-w-sm border border-stone-800 shadow-inner">
+                        <Typography variant="caption" className="text-stone-400 font-mono block mb-1">
                           Run locally to authenticate:
                         </Typography>
                         <code className="text-emerald-400 font-mono text-sm block font-bold">
@@ -129,10 +129,10 @@ export default function SettingsPage() {
             <Info size={24} />
           </div>
           <div>
-            <Typography variant="h6" className="font-bold text-slate-800 dark:text-white mb-1">
+            <Typography variant="h6" className="font-bold text-stone-800 dark:text-white mb-1">
               Smart Storage Routing
             </Typography>
-            <Typography variant="body2" className="text-slate-600 dark:text-slate-400 leading-relaxed">
+            <Typography variant="body2" className="text-stone-600 dark:text-stone-400 leading-relaxed">
               SmartCloud automatically routes files to the most optimal cloud based on size, frequency, and remaining quota. By connecting multiple free accounts, you can create a massive unified storage pool.
             </Typography>
           </div>

@@ -68,19 +68,23 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 p-4 relative overflow-hidden">
-      {/* Decorative background blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute top-0 right-0 w-96 h-96 bg-rose-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{ 
+        backgroundImage: 'url(/light_cloth_bg.png)', 
+        backgroundSize: 'cover', 
+        backgroundPosition: 'center' 
+      }}
+    >
+      <div className="absolute inset-0 bg-stone-900/20 dark:bg-stone-900/60 backdrop-blur-[2px]"></div>
 
       <Grow in={true} timeout={800}>
         <Paper
           elevation={0}
-          className="w-full max-w-md p-8 rounded-3xl border border-white/40 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl z-10"
+          className="w-full max-w-md p-8 rounded-3xl border border-white/40 dark:border-stone-800 bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl shadow-2xl z-10"
         >
           <Box className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md overflow-hidden p-1 border border-slate-100 dark:border-slate-800">
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md overflow-hidden p-1 border border-stone-100 dark:border-stone-800">
               <img src="/logo.png" alt="SmartCloudTex Logo" className="w-full h-full object-contain" />
             </div>
             <Typography variant="h5" className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-rose-500 tracking-tight">
@@ -89,10 +93,10 @@ export default function RegisterPage() {
           </Box>
 
           <Box className="mb-8">
-            <Typography variant="h3" className="font-bold text-slate-800 dark:text-white mb-2 tracking-tight">
+            <Typography variant="h3" className="font-bold text-stone-800 dark:text-white mb-2 tracking-tight">
               User Registration
             </Typography>
-            <Typography variant="body1" className="text-slate-500 dark:text-slate-400">
+            <Typography variant="body1" className="text-stone-500 dark:text-stone-400">
               Join the AI-Enhanced File Storage for Textile SMEs
             </Typography>
           </Box>
@@ -110,10 +114,10 @@ export default function RegisterPage() {
             )}
 
             <Box className="mb-2">
-              <Typography variant="caption" className="text-slate-500 font-bold ml-2 uppercase tracking-wide">
+              <Typography variant="caption" className="text-stone-500 font-bold ml-2 uppercase tracking-wide">
                 Select Your Role
               </Typography>
-              <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full items-center mt-2 shadow-inner border border-slate-200 dark:border-slate-700">
+              <div className="flex bg-stone-100 dark:bg-stone-800 p-1.5 rounded-full items-center mt-2 shadow-inner border border-stone-200 dark:border-stone-700">
                 {['Admin', 'Supervisor', 'Staff'].map((r) => (
                   <button
                     key={r}
@@ -122,7 +126,7 @@ export default function RegisterPage() {
                     className={`flex-1 text-center py-2.5 rounded-full font-bold transition-all text-sm ${
                       role === r
                         ? 'bg-blue-600 text-white shadow-md transform scale-[1.02]'
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
+                        : 'text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-stone-700/50'
                     }`}
                   >
                     {r}
@@ -145,10 +149,10 @@ export default function RegisterPage() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <User size={20} className="text-slate-400" />
+                    <User size={20} className="text-stone-400" />
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white light:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-stone-800"
               }}
             />
 
@@ -166,10 +170,10 @@ export default function RegisterPage() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Mail size={20} className="text-slate-400" />
+                    <Mail size={20} className="text-stone-400" />
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white light:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-stone-800"
               }}
             />
 
@@ -187,7 +191,7 @@ export default function RegisterPage() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Lock size={20} className="text-slate-400" />
+                    <Lock size={20} className="text-stone-400" />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -195,13 +199,13 @@ export default function RegisterPage() {
                     <IconButton
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
-                      className="text-slate-400"
+                      className="text-stone-400"
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </IconButton>
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white light:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-stone-800"
               }}
             />
 
@@ -219,7 +223,7 @@ export default function RegisterPage() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Lock size={20} className="text-slate-400" />
+                    <Lock size={20} className="text-stone-400" />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -227,13 +231,13 @@ export default function RegisterPage() {
                     <IconButton
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       edge="end"
-                      className="text-slate-400"
+                      className="text-stone-400"
                     >
                       {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </IconButton>
                   </InputAdornment>
                 ),
-                className: "rounded-xl bg-white light:bg-slate-800"
+                className: "rounded-xl bg-white light:bg-stone-800"
               }}
             />
 
@@ -250,7 +254,7 @@ export default function RegisterPage() {
             </Button>
           </Box>
 
-          <Typography variant="body2" className="text-center text-slate-500 dark:text-slate-400 mt-8">
+          <Typography variant="body2" className="text-center text-stone-500 dark:text-stone-400 mt-8">
             Already have an account?{' '}
             <span
               className="text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:underline"

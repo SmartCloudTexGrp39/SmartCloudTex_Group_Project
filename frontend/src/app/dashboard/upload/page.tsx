@@ -133,15 +133,15 @@ export default function UploadPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in-fade">
       <div>
-        <Typography variant="h4" className="font-extrabold text-slate-900 dark:text-white mb-2">
+        <Typography variant="h4" className="font-extrabold text-stone-900 dark:text-white mb-2">
           Smart Asset Upload
         </Typography>
-        <Typography variant="body1" className="text-slate-500 dark:text-slate-400">
+        <Typography variant="body1" className="text-stone-500 dark:text-stone-400">
           Upload your textile designs and let our AI handle classification and optimal storage routing.
         </Typography>
       </div>
 
-      <Paper elevation={0} className="glass-card p-8 border-slate-200/50 dark:border-white/5">
+      <Paper elevation={0} className="glass-card p-8 border-stone-200/50 dark:border-white/5">
         <Stepper activeStep={activeStep} className="mb-12">
           {steps.map((label) => (
             <Step key={label} sx={{
@@ -164,36 +164,47 @@ export default function UploadPage() {
               className={`w-full border-2 border-dashed rounded-3xl p-12 transition-all cursor-pointer group ${
                 dragActive 
                   ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/30' 
-                  : 'border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/10'
+                  : 'border-stone-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/10'
               }`}
             >
               <div className="w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 mb-6 mx-auto group-hover:scale-110 transition-transform">
                 <CloudUpload size={40} />
               </div>
-              <Typography variant="h6" className="font-bold text-slate-800 dark:text-white mb-2">
+              <Typography variant="h6" className="font-bold text-stone-800 dark:text-white mb-2">
                 Drop your files here or click to browse
               </Typography>
-              <Typography variant="body2" className="text-slate-500 mb-6">
+              <Typography variant="body2" className="text-stone-500 mb-6">
                 Support PDF, DOCX, PNG, and JPG up to 50MB
               </Typography>
-              <Button component="label" variant="contained" className="bg-blue-600 hover:bg-blue-700 rounded-xl px-10 py-3 font-bold normal-case shadow-lg shadow-blue-500/20">
+              <Button
+                component="label"
+                variant="contained"
+                className="bg-blue-600 hover:bg-blue-700 rounded-xl px-10 py-3 font-bold normal-case shadow-lg shadow-blue-500/20"
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
                 Browse Files
-                <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileSelect} />
+                <input
+                  type="file"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  onClick={(e: React.MouseEvent<HTMLInputElement>) => { e.currentTarget.value = ''; }}
+                />
               </Button>
             </div>
           )}
 
           {activeStep === 1 && (
             <div className="w-full space-y-8 animate-in-fade">
-              <div className="flex items-center gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/5 max-w-md mx-auto">
+              <div className="flex items-center gap-4 bg-stone-50 dark:bg-white/5 p-4 rounded-2xl border border-stone-100 dark:border-white/5 max-w-md mx-auto">
                 <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center text-white">
                   <FileText size={24} />
                 </div>
                 <div className="text-left flex-1 overflow-hidden">
-                  <Typography variant="subtitle2" className="font-bold text-slate-800 dark:text-white truncate">
+                  <Typography variant="subtitle2" className="font-bold text-stone-800 dark:text-white truncate">
                     {selectedFile?.name}
                   </Typography>
-                  <Typography variant="caption" className="text-slate-500">{selectedFile?.size}</Typography>
+                  <Typography variant="caption" className="text-stone-500">{selectedFile?.size}</Typography>
                 </div>
               </div>
 
@@ -201,14 +212,14 @@ export default function UploadPage() {
                 <div className="space-y-6 max-w-sm mx-auto">
                   <div className="flex flex-col items-center">
                     <Brain className="text-blue-500 animate-pulse mb-4" size={48} />
-                    <Typography variant="body1" className="font-bold text-slate-700 dark:text-slate-200">
+                    <Typography variant="body1" className="font-bold text-stone-700 dark:text-stone-200">
                       AI is classifying your asset...
                     </Typography>
                   </div>
                   <LinearProgress className="h-2 rounded-full bg-blue-100 dark:bg-white/5 [&>.MuiLinearProgress-bar]:bg-blue-600" />
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="h-8 bg-slate-100 dark:bg-white/5 rounded-lg animate-pulse" />
-                    <div className="h-8 bg-slate-100 dark:bg-white/5 rounded-lg animate-pulse" />
+                    <div className="h-8 bg-stone-100 dark:bg-white/5 rounded-lg animate-pulse" />
+                    <div className="h-8 bg-stone-100 dark:bg-white/5 rounded-lg animate-pulse" />
                   </div>
                 </div>
               ) : (
@@ -229,17 +240,17 @@ export default function UploadPage() {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <Zap size={18} className="text-amber-500" />
-                          <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tighter italic">Smart Routing</span>
+                          <span className="text-xs font-black text-stone-800 dark:text-white uppercase tracking-tighter italic">Smart Routing</span>
                         </div>
                       </div>
-                      <Typography variant="body2" className="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed">
+                      <Typography variant="body2" className="text-stone-600 dark:text-stone-400 mb-4 text-sm leading-relaxed">
                         Based on access frequency and file type, we recommend storing this in:
                       </Typography>
-                      <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
+                      <div className="flex items-center gap-3 p-3 bg-white dark:bg-stone-900 rounded-xl border border-stone-100 dark:border-white/5 shadow-sm">
                         <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white">
                           <Cloud size={18} />
                         </div>
-                        <Typography className="font-bold text-slate-800 dark:text-white">{analysis?.route}</Typography>
+                        <Typography className="font-bold text-stone-800 dark:text-white">{analysis?.route}</Typography>
                       </div>
                     </div>
                   </div>
@@ -280,8 +291,8 @@ export default function UploadPage() {
                 <CheckCircle2 size={48} />
               </div>
               <div>
-                <Typography variant="h5" className="font-bold text-slate-800 dark:text-white">File Successfully Routed</Typography>
-                <Typography variant="body2" className="text-slate-500 mt-2 mb-4">
+                <Typography variant="h5" className="font-bold text-stone-800 dark:text-white">File Successfully Routed</Typography>
+                <Typography variant="body2" className="text-stone-500 mt-2 mb-4">
                   Stored in <span className="text-blue-500 font-bold">{analysis?.route}</span>
                 </Typography>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -304,7 +315,7 @@ export default function UploadPage() {
                 </Button>
                 <Button
                   onClick={() => router.push('/dashboard')}
-                  className="bg-slate-900 dark:bg-white dark:text-slate-950 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl px-10 py-3 font-bold"
+                  className="bg-stone-900 dark:bg-white dark:text-stone-950 hover:bg-stone-800 dark:hover:bg-stone-100 rounded-xl px-10 py-3 font-bold"
                 >
                   View in Dashboard
                 </Button>
@@ -319,7 +330,7 @@ export default function UploadPage() {
         open={showDuplicateModal}
         onClose={() => setShowDuplicateModal(false)}
         PaperProps={{
-          className: "glass-card p-4 border-white/10 dark:bg-slate-900 max-w-md w-full rounded-3xl"
+          className: "glass-card p-4 border-white/10 dark:bg-stone-900 max-w-md w-full rounded-3xl"
         }}
       >
         <DialogTitle className="flex justify-between items-center p-4">
@@ -329,51 +340,51 @@ export default function UploadPage() {
             </div>
             <Typography variant="h6" className="font-bold dark:text-white">Duplicate Detected</Typography>
           </div>
-          <IconButton onClick={() => setShowDuplicateModal(false)} className="text-slate-400">
+          <IconButton onClick={() => setShowDuplicateModal(false)} className="text-stone-400">
             <X size={20} />
           </IconButton>
         </DialogTitle>
         <DialogContent className="p-4">
-          <Typography variant="body2" className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-            A file with the exact same content already exists in your <span className="font-bold text-slate-800 dark:text-slate-200">{analysis?.route}</span>. How would you like to proceed?
+          <Typography variant="body2" className="text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
+            A file with the exact same content already exists in your <span className="font-bold text-stone-800 dark:text-stone-200">{analysis?.route}</span>. How would you like to proceed?
           </Typography>
 
           <div className="space-y-3">
             <button
               onClick={() => handleResolveDuplicate('replace')}
-              className="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all text-left group"
+              className="w-full flex items-center justify-between p-4 rounded-2xl border border-stone-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all text-left group"
             >
               <div className="flex items-center gap-3">
                 <RefreshCw size={20} className="text-blue-500 group-hover:rotate-180 transition-transform duration-500" />
                 <div>
-                  <Typography className="font-bold text-slate-800 dark:text-white text-sm">Replace Existing</Typography>
-                  <Typography variant="caption" className="text-slate-500">The current version will be overwritten</Typography>
+                  <Typography className="font-bold text-stone-800 dark:text-white text-sm">Replace Existing</Typography>
+                  <Typography variant="caption" className="text-stone-500">The current version will be overwritten</Typography>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => handleResolveDuplicate('version')}
-              className="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all text-left group"
+              className="w-full flex items-center justify-between p-4 rounded-2xl border border-stone-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all text-left group"
             >
               <div className="flex items-center gap-3">
                 <Copy size={20} className="text-purple-500" />
                 <div>
-                  <Typography className="font-bold text-slate-800 dark:text-white text-sm">Keep Both (Version)</Typography>
-                  <Typography variant="caption" className="text-slate-500">Store as a new version: v2.0</Typography>
+                  <Typography className="font-bold text-stone-800 dark:text-white text-sm">Keep Both (Version)</Typography>
+                  <Typography variant="caption" className="text-stone-500">Store as a new version: v2.0</Typography>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => handleResolveDuplicate('skip')}
-              className="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-200 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group"
+              className="w-full flex items-center justify-between p-4 rounded-2xl border border-stone-200 dark:border-white/5 hover:bg-stone-50 dark:hover:bg-white/5 transition-all text-left group"
             >
               <div className="flex items-center gap-3">
-                <X size={20} className="text-slate-400" />
+                <X size={20} className="text-stone-400" />
                 <div>
-                  <Typography className="font-bold text-slate-800 dark:text-white text-sm">Skip Upload</Typography>
-                  <Typography variant="caption" className="text-slate-500">Cancel the current upload operation</Typography>
+                  <Typography className="font-bold text-stone-800 dark:text-white text-sm">Skip Upload</Typography>
+                  <Typography variant="caption" className="text-stone-500">Cancel the current upload operation</Typography>
                 </div>
               </div>
             </button>

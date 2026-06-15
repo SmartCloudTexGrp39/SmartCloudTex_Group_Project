@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const filteredMenuItems = menuItems.filter(item => item.roles.includes(role));
 
   const drawer = (
-    <div className="h-full flex flex-col bg-slate-950/90 backdrop-blur-xl border-r border-white/5 text-white">
+    <div className="h-full flex flex-col bg-stone-950/90 backdrop-blur-xl border-r border-white/5 text-white">
       <Toolbar className="flex items-center justify-start px-8 py-10">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
@@ -108,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <ListItemButton
                   className={`rounded-xl transition-all duration-300 py-3 group ${isActive
                     ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    : 'text-stone-400 hover:text-white hover:bg-white/5'
                     }`}
                 >
                   <ListItemIcon sx={{ minWidth: '40px', color: 'inherit' }}>
@@ -151,7 +151,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <Box sx={{ display: 'flex' }} className="min-h-screen bg-slate-50 dark:bg-gray-950">
+    <Box sx={{ display: 'flex' }} className="min-h-screen relative">
+      {/* Global Background Image with dynamic dark mode overlay */}
+      <div 
+        className="fixed inset-0 z-0 transition-colors duration-300"
+        style={{ 
+          backgroundImage: 'url(/light_cloth_bg.png)', 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center' 
+        }}
+      >
+        <div className="absolute inset-0 bg-stone-50/60 dark:bg-stone-950/80 backdrop-blur-[2px]"></div>
+      </div>
+
       <AppBar
         position="fixed"
         elevation={0}
@@ -163,7 +175,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
-        className="dark:border-slate-800/50"
+        className="dark:border-stone-800/50"
       >
         <Toolbar className="justify-between px-6">
           <IconButton
@@ -172,31 +184,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             edge="start"
             onClick={handleDrawerToggle}
             sx={{ mr: 2, display: { sm: 'none' } }}
-            className="text-slate-700 dark:text-slate-300"
+            className="text-stone-700 dark:text-stone-300"
           >
             <MenuIcon />
           </IconButton>
 
           <div className="flex-1 max-w-md hidden md:block">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-blue-500 transition-colors" size={18} />
               <input
                 type="text"
                 placeholder="Search across all clouds..."
-                className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                className="w-full bg-stone-100 dark:bg-stone-900 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
               />
             </div>
           </div>
 
           <Box className="flex items-center gap-2">
-            <IconButton className="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <IconButton className="text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800">
               <Sun size={20} />
             </IconButton>
-            <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-800 mx-2" />
+            <div className="h-6 w-[1px] bg-stone-200 dark:bg-stone-800 mx-2" />
             <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
               <div className="text-right hidden sm:block">
-                <Typography variant="body2" className="font-bold text-slate-700 dark:text-slate-200 leading-none mb-1">{username}</Typography>
-                <Typography variant="caption" className="text-slate-400">{role}</Typography>
+                <Typography variant="body2" className="font-bold text-stone-700 dark:text-stone-200 leading-none mb-1">{username}</Typography>
+                <Typography variant="caption" className="text-stone-400">{role}</Typography>
               </div>
               <Avatar className="w-9 h-9 bg-blue-600 text-sm font-semibold shadow-lg shadow-blue-500/20 uppercase">{username[0]}</Avatar>
             </div>
@@ -205,7 +217,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </AppBar>
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 }, zIndex: 20 }}
       >
         <Drawer
           variant="temporary"
@@ -234,7 +246,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Box
         component="main"
         sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
-        className="animate-in-fade"
+        className="animate-in-fade z-10 relative"
       >
         <Toolbar />
         {children}
